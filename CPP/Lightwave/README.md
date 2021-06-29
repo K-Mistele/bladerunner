@@ -9,9 +9,21 @@ Lightwave is a C++ shellcode loader that uses `CreateRemoteThread` to inject she
 
 ## Usage
 ```
-lightwave.exe executablePath  [toggleDebug]
+lightwave.exe LaunchType Target [Debug]
 ```
 
 Note: all arguments are positional.
-* `executablePath`: path to the executable to launch. Make sure to double quote if there are spaces or special characters
-* `toggleDebug`: if specified as "debug", will run debug mode which will give you verbose debugging information
+* `LaunchType`: required positional argument. Permitted values:
+	* `PID`: target an existing process
+	* `EXEC`: specify an executable to run via command line
+* `Target`: required positional argument. Permitted values:
+	* if `LaunchType` is `PID`: the PID of an existing process to inject shellcode into
+	* if `LaunchType` is `EXEC`: the path (and arguments?) of an executable to launch. Make sure to double-quote this value if there are spaces.
+* `Debug`: optional positional argument. If set to `debug`, then will print extra debugging information.
+
+### Examples:
+```
+Lightwave.exe PID 5268 debug
+
+>Lightwave.exe EXEC "C:/program files/internet explorer/iexplore.exe" debug
+```
