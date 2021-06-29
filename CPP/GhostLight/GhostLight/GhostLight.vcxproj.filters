@@ -26,5 +26,13 @@
     <ClInclude Include="base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ghostcalls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ghostcalls.asm">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

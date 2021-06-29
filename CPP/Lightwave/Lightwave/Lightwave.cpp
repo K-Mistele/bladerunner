@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include "base64.h"
 #include <string>
+#include "ghostcalls.h"
 
 
 using std::cout;
