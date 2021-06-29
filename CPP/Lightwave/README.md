@@ -26,4 +26,6 @@ Note: all arguments are positional.
 Lightwave.exe PID 5268 debug
 
 Lightwave.exe EXEC "C:/program files/internet explorer/iexplore.exe" debug
+
+Lightwave.exe EXEC "powershell.exe -windowstyle hidden" debug
 ```
