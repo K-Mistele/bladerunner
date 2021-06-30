@@ -1,11 +1,27 @@
 # GhostLight
-GhostLight is a C++ shellcode loader that uses `CreateRemoteThread` to inject shellcode into a process. 
+GhostLight is a C++ shellcode loader that uses kernel system calls to inject shellcode into a process. 
+Specifically, it packs a `.asm` file that contains the system calls it uses pulled from `ntdll.dll` to bypass userland API hooking. 
+Note that this will not bypass hooking in the kernel. The assembly file contains implementations of the syscalls for Windows 7, Windows 8, and Windows 10.
+
+Syscall assembly file is generated with https://github.com/jthuraisamy/SysWhispers. I picked out only the ones I need to minimize the footprint:
+* `NtCreateProcess`
+* `NtOpenProcess`
+* `NtAllocateVirtualMemory`
+* `NtWriteVirtualMemory`
+* `NtProtectVirtualMemory`
+* `NtCreateThread`
+* `NtClose`
+
+However, I haven't yet switched `OpenProcess` for `NtOpenProcess` or `NtCreateProcess` for `CreateProcessA` since they're hard to figure out the right arguments for.
+Helpful documentation can be found here: http://undocumented.ntinternals.net
 
 ## How it Works
-1. Create a new process by launching a chosen executable
-2. Use the handle on the launched process to reserve memory in the new process
-3. Inject shellcode into that new RWX memory
-4. Create a new thread in that process to run the shellcode
+1. Create a new process by launching a chosen executable or open an existing process
+2. Use the handle on the launched process to reserve memory read/write memory in the new process
+3. Inject shellcode into that new RW memory
+4. Change memory protection to execute-only to prevent need for RWX memory
+5. Create a new thread in that process to run the shellcode
+
 
 ### Very important addendum
 Lots of shellcode loaders take the easy way out by using `VirtualAllocEx` to allocate `PAGE_EXECUTE_READWRITE` (rwx) memory. This type of memory is often considered suspicious, 
@@ -17,10 +33,10 @@ BEFORE creating the thread.
 shellcode that is encrypted in some way, and then encoded in base64: the loader decodes the shellcode and then decrypts it before executing it. Instead of relying on self-editing shellcode
 consider using normal shellcode that is not self-modifying, and then encrypting it yourself (easy to do with Python and XOR).
 
-**If you supply your own encryption on a non-self-encrypting shellcode**, you must modify the `decrypt` function to perform the decryption.**
+**If you supply your own encryption on a non-self-encrypting shellcode, you must modify the** `decrypt` **function to perform the decryption.**
 
 **If you are determined to use self-decrypting or self-decoding shellcode, you probably need to nuke the decryption routing in the loader, and in the call to** `VirtualProtectEx` 
-** you need to specify `PAGE_EXECUTE_READWRITE` instead of `PAGE_EXECUTE`. Be forewarned that this may increase detections.**
+**you need to specify** `PAGE_EXECUTE_READWRITE` **instead of** `PAGE_EXECUTE`. **Be forewarned that this may increase detections.**
 
 ## Usage
 ```
