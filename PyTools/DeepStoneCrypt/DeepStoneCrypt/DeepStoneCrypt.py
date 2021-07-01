@@ -55,7 +55,7 @@ def write_binary_file(fname, contents):
 		binary_file.write(contents)
 
 # PERFORM BYTEWISE XOR ENCRYPTION
-def encrypt_bytewise_xor(src_bytes, xor_key):
+def encrypt_bytewise_xor(shellcode, xor_key):
 
 	# CONVERT STRING FROM PARAM TO INT AND BOUNDS CHECK IT
 	try:
@@ -68,10 +68,38 @@ def encrypt_bytewise_xor(src_bytes, xor_key):
 
 
 	print(f'[+] Encrypting shellcode with key {xor_key}')
+	encrypted_shellcode = b""
+
+	# LOOP OVER AND PERFORM ENCRYPTION
+	try:
+		for i in range(0, len(shellcode)):
+			encrypted_shellcode += bytes([shellcode[i] ^ xor_key])
+	except Exception as e:
+		print(f'[-] Error encrypting shellcode: {e}')
+		quit(3)
+	
+		print(f'[+] Finished encrypting shellcode')
+	return encrypted_shellcode
 
 # PERFORM XOR KEY ENCRYPTION
-def encrypt_xor_key(src_bytes, key):
-	pass
+def encrypt_xor_key(shellcode, key):
+
+	print(f'[+] Encrypting shellcode with key {key}')
+
+	encyrpted_shellcode = b""
+	i = 0 # INDEX IN src_bytes AND encrypted_bytes
+	j = 0 # INDEX IN key
+	while i < len(shellcode):
+
+		# IF INDEX IN KEY IS PAST THE END, START AT THE BEGINNING OF THE KEY AGAIN
+		if j >= len(key): j = 0
+
+		# CREATE EACH ENCRYPTED BYTE BY XORING WITH SOME VALUE IN THE KEY
+		encrypted_shellcode += bytes([shellcode[i] ^ key[j]])
+		i += 1
+		j += 1
+	
+	print(f'[+] Finished encrypting shellcode')
 
 # THE MAIN METHOD, MOSTLY HANDLES ARGUMENT PARSING AND KICKING OFF OTHER FUNCTIONS
 def main():
@@ -84,7 +112,7 @@ def main():
 	parser.add_argument('--out', dest='out_file', required=True, help='Specify the output file (binary or text format depending on encoding options')
 	parser.add_argument('--bytewise-xor', dest='bytewise_xor', required=False, help='Specify the XOR key to encrypt the payload with. Acceptable values are 0-255')
 	parser.add_argument('--xor-key', dest='xor_key', required=False, help='Specify a string to XOR encrypt the payload with, one character at a time')
-	parser.add_argument('--encoding-type', dest='encoding_type', required=False, help='Specify an encoding type. Currently only base64 and base32 are supported')
+	parser.add_argument('--encoding-type', dest='encoding_type', required=False, choices=['base64', 'base32'], help='Specify an encoding type. Currently only base64 and base32 are supported')
 
 	# BUILD ARGUMENTS AND CONVERT THE NAMESPACE INTO A DICT
 	args = vars(parser.parse_args())
@@ -118,7 +146,18 @@ def main():
 
 
 	# DETERMINE ENCODING TYPE IF IT EXISTS AND PERFORM ENCODING
-	encoded_shellcode = b""
+	encoded_shellcode = ""
+	if args["encoding_type"] == 'base64':
+		print(f'[+] Base64 encoding selected (UTF-8)')
+		encoded_shellcode = (base64.b64encode(encrypted_shellcode)).decode('utf-8')
+	elif args['encoding_type'] == 'base32':
+		print(f'[+] Base32 encoding selected (UTF-8)')
+		encoded_shellcode = (base64.b16encode(encrypted_shellcode)).decode('utf-8')
+	else:
+		print(f'[+] No encoding selected.')
+		encoded_shellcode = encrypted_shellcode
+	
+
 	# WRITE OUTPUT
 	if args['encoding_type']:
 		print(f'[+] Writing out {len(encoded_shellcode)} characters to {args["out_file"]}')
@@ -128,9 +167,8 @@ def main():
 		print(f'[+] Writing out {len(encoded_shellcode)} bytes to {args["out_file"]}')
 		write_binary_file(args['out_file'], encoded_shellcode)
 		print(f'[+] Finished writing out {args["out_file"]}')
-
+	print(f'[+] Hack the Planet!')
 	
-
 	
 
 # RUN MAIN IF THIS IS LOADED AS THE MAIN MODULE
