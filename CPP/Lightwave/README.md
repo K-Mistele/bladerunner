@@ -7,6 +7,12 @@ Lightwave is a C++ shellcode loader that uses `CreateRemoteThread` to inject she
 3. Inject shellcode into that new RWX memory
 4. Create a new thread in that process to run the shellcode
 
+## Customization
+Make sure to edit the source with the following: 
+* your shellcode
+* change the right decryption routine, and ensure that it's called in main
+* per the addendum below, you may need to modify the memory protection options in `VirtualAllocEx` and `VirtualProtectEx`
+
 ### Very important addendum
 Lots of shellcode loaders take the easy way out by using `VirtualAllocEx` to allocate `PAGE_EXECUTE_READWRITE` (rwx) memory. This type of memory is often considered suspicious, 
 and it is obvious to AV/EDR and may be easily detected.
