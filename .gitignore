@@ -390,3 +390,4 @@ FodyWeavers.xsd
 # CUSTOM
 *.bin
 *.b64
+*.txt
