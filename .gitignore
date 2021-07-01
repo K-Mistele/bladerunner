@@ -387,3 +387,6 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 
+# CUSTOM
+*.bin
+*.b64
