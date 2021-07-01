@@ -86,7 +86,7 @@ def encrypt_xor_key(shellcode, key):
 
 	print(f'[+] Encrypting shellcode with key {key}')
 
-	encyrpted_shellcode = b""
+	encrypted_shellcode = b""
 	i = 0 # INDEX IN src_bytes AND encrypted_bytes
 	j = 0 # INDEX IN key
 	while i < len(shellcode):
@@ -95,11 +95,12 @@ def encrypt_xor_key(shellcode, key):
 		if j >= len(key): j = 0
 
 		# CREATE EACH ENCRYPTED BYTE BY XORING WITH SOME VALUE IN THE KEY
-		encrypted_shellcode += bytes([shellcode[i] ^ key[j]])
+		encrypted_shellcode += bytes([shellcode[i] ^ord(key[j])])
 		i += 1
 		j += 1
 	
 	print(f'[+] Finished encrypting shellcode')
+	return encrypted_shellcode
 
 # THE MAIN METHOD, MOSTLY HANDLES ARGUMENT PARSING AND KICKING OFF OTHER FUNCTIONS
 def main():
