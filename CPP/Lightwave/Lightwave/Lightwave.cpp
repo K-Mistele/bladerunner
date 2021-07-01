@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 
 // EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
 unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
-
+	if (DEBUG_MODE) cout << "Decrypting with bytewise XOR" << endl;
 	const unsigned char xKey = 35;
 	
 	unsigned char* decrData = new unsigned char[length+1]; // ALLOCATE + 1 FOR NULL BYTE
@@ -107,12 +107,13 @@ unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
 		decrData[i] = encryptedBytes[i] ^ xKey;
 	}
 	decrData[length] = '\x00';
+	if (DEBUG_MODE) cout << "finished decryption!" << endl;
 	return decrData;
 }
 
 // EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
 unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
-	cout << "Decrypting..." << endl;
+	if (DEBUG_MODE) cout << "Decrypting with key..." << endl;
 	// KEY AND KEY LENGTH
 	char key[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
 	size_t keyLength = 10;
@@ -128,12 +129,12 @@ unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
 		// IF WE'RE AT THE END OF THE KEY, GO BACK TO THE BEGINNING
 		if (j == keyLength) {
 			j = 0;
-			cout << "Hit end of key, looping back to start!" << endl;
 		}
 		decrData[i] = encryptedBytes[i] ^ (unsigned char)key[j];
 		j++;
 	}
 	decrData[length] = '\x00';
+	if (DEBUG_MODE) cout << "finished decryption" << endl;
 	return decrData;
 }
 
