@@ -1,4 +1,7 @@
 # GhostLight
+** Ghostlight uses the `CreateRemoteThread` injection technique. This will gets caught by Crowdstrike despite the custom syscalls. It may make it past 
+other less sophisticated EDRs and AVs that are only doing API hooking or DLL injection and are not tracking additional telemetry or kernel-mode hooking** 
+
 GhostLight is a C++ shellcode loader that uses kernel system calls to inject shellcode into a process. 
 Specifically, it packs a `.asm` file that contains the system calls it uses pulled from `ntdll.dll` to bypass userland API hooking. 
 Note that this will not bypass hooking in the kernel. The assembly file contains implementations of the syscalls for Windows 7, Windows 8, and Windows 10, but for x64 Windows only. x32 is not supported.
