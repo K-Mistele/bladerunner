@@ -1,19 +1,9 @@
-# GhostLight
+# BlackLight
 GhostLight is a C++ shellcode loader that uses kernel system calls to inject shellcode into a process. 
 Specifically, it packs a `.asm` file that contains the system calls it uses pulled from `ntdll.dll` to bypass userland API hooking. 
 Note that this will not bypass hooking in the kernel. The assembly file contains implementations of the syscalls for Windows 7, Windows 8, and Windows 10, but for x64 Windows only. x32 is not supported.
 
 Syscall assembly file is generated with https://github.com/jthuraisamy/SysWhispers. I picked out only the ones I need to minimize the footprint:
-* `NtCreateProcess`
-* `NtOpenProcess`
-* `NtAllocateVirtualMemory`
-* `NtWriteVirtualMemory`
-* `NtProtectVirtualMemory`
-* `NtCreateThread`
-* `NtClose`
-
-However, I haven't yet switched `OpenProcess` for `NtOpenProcess` or `NtCreateProcess` for `CreateProcessA` since they're hard to figure out the right arguments for.
-Helpful documentation can be found here: http://undocumented.ntinternals.net
 
 ## Configuring Visual Studio 
 To successfully compile this project, you need to ensure that masm is enabled for the project. Importing the solution should do this for you, but if not:
@@ -22,15 +12,6 @@ To successfully compile this project, you need to ensure that masm is enabled fo
 2.In the Solution Explorer, add the .h and .asm files to the project as header and source files, respectively.
 3.Go to the properties of the ASM file, and set the Item Type to Microsoft Macro Assembler.
 4.Ensure that the project platform is set to x64. The `.asm` file does not support x32 windows, so neither does this project.
-
-
-## How it Works
-1. Create a new process by launching a chosen executable or open an existing process
-2. Use the handle on the launched process to reserve memory read/write memory in the new process
-3. Inject shellcode into that new RW memory
-4. Change memory protection to execute-only to prevent need for RWX memory
-5. Create a new thread in that process to run the shellcode
-
 
 ### Very important addendum
 Lots of shellcode loaders take the easy way out by using `VirtualAllocEx` to allocate `PAGE_EXECUTE_READWRITE` (rwx) memory. This type of memory is often considered suspicious, 
