@@ -21,7 +21,6 @@ void error(string);
 void error(char*);
 
 // GLOBALS
-DWORD TARGET_PID;
 BOOL DEBUG_MODE = false;
 enum DECRYPTION_MODE {
 	XOR_KEY = 1,
@@ -58,21 +57,9 @@ int main(int argc, char** argv) {
 	// 1: TARGET PID
 	// 2: DEBUG MODE
 
-	if (argc < 2) {
-		error("Invalid arguments, missing sc!");
-		exit(1);
-	}
-	else if (argc == 2) {
-		DEBUG_MODE = false;
-		TARGET_PID = atoi(argv[1]);
-
-	}
-	else if (argc == 3) {
+	if (argc == 2) {
 		DEBUG_MODE = true;
-		TARGET_PID = atoi(argv[1]);
 		debug("Debug Mode activated");
-		debug("Got target pid:");
-		debug(argv[1]);
 	}
 
 	// DECODE B64 INTO BYTES
