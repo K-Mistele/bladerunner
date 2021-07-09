@@ -25,6 +25,14 @@ This loader does _not_ use process injection, it is a standalone loader and will
 6. Queue and APC thread to execute the shellcode
 7. Call `NtTestAlert` to force the process to flush the APC Queue and execute the shellcode
 
+## Customization
+Make sure to edit the source with the following: 
+* your shellcode, encrypted and base64 decoded
+* set your key - either bytewise xor or a key string
+* change the `DECRYPTION_MODE` enum in the configuration to use the right decryption method
+* per the addendum below, you may need to modify the memory protection options in `VirtualAllocEx` and `VirtualProtectEx`
+
+
 ## Very important addendum
 Lots of shellcode loaders take the easy way out by using `VirtualAlloc` to allocate `PAGE_EXECUTE_READWRITE` (rwx) memory. This type of memory is often considered suspicious, 
 and it is obvious to AV/EDR and may be easily detected.

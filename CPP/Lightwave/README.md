@@ -20,8 +20,9 @@ am told that it can happen)
 
 ## Customization
 Make sure to edit the source with the following: 
-* your shellcode
-* change the right decryption routine, and ensure that it's called in main
+* your shellcode, encrypted and base64 encoded
+* set your key - either bytewise xor or a key string
+* change the `DECRYPTION_MODE` enum in the configuration to use the right decryption method
 * per the addendum below, you may need to modify the memory protection options in `VirtualAllocEx` and `VirtualProtectEx`
 
 ## Very important addendum
