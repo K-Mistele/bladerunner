@@ -1,11 +1,22 @@
 # Lightwave
-Lightwave is a C++ shellcode loader that uses `CreateRemoteThread` to inject shellcode into a process. 
+Lightwave is a C++ shellcode loader that uses `NtQueueApcThread` to inject shellcode into a process.
+
+**As of testing on 07/09/2021, this loader will bypass both CrowdStrike and Windows Defender ATP**
 
 ## How it Works
-1. Create a new process by launching a chosen executable
-2. Use the handle on the launched process to reserve memory in the new process
-3. Inject shellcode into that new RWX memory
-4. Create a new thread in that process to run the shellcode
+1. Open the target process
+2. Allocate memory in read-write mode
+3. write the shellcode
+4. re-protect the memory to read-execute 
+5. Iterate across threads, Queuing an APC for each.
+
+## Caveats
+Note that this technique not guarantee execution: there must be at least one thread in the target process in an alertable state. 
+The more threads that a process has, the more likely you are to find one in the right state. However, if multiple threads are in the alertable state, you may get multiple beacons/shells.
+
+Additionally, if the thread you're in dies, your beacon/shell will as well, so you should try to migrate ASAP (I have not experienced this while testing with injecting into `firefox.exe`, but I
+am told that it can happen)
+
 
 ## Customization
 Make sure to edit the source with the following: 
@@ -13,7 +24,7 @@ Make sure to edit the source with the following:
 * change the right decryption routine, and ensure that it's called in main
 * per the addendum below, you may need to modify the memory protection options in `VirtualAllocEx` and `VirtualProtectEx`
 
-### Very important addendum
+## Very important addendum
 Lots of shellcode loaders take the easy way out by using `VirtualAllocEx` to allocate `PAGE_EXECUTE_READWRITE` (rwx) memory. This type of memory is often considered suspicious, 
 and it is obvious to AV/EDR and may be easily detected.
 In this loader, I have elected to allocate the memory as `PAGE_READWRITE`, and then use `VirtualProtectEx` to change the protection to `PAGE_EXECUTE` after injecting the shellcode but
@@ -30,23 +41,5 @@ consider using normal shellcode that is not self-modifying, and then encrypting 
 
 ## Usage
 ```
-lightwave.exe LaunchType Target [Debug]
-```
-
-Note: all arguments are positional.
-* `LaunchType`: required positional argument. Permitted values:
-	* `PID`: target an existing process
-	* `EXEC`: specify an executable to run via command line
-* `Target`: required positional argument. Permitted values:
-	* if `LaunchType` is `PID`: the PID of an existing process to inject shellcode into
-	* if `LaunchType` is `EXEC`: the path (and arguments?) of an executable to launch. Make sure to double-quote this value if there are spaces.
-* `Debug`: optional positional argument. If set to `debug`, then will print extra debugging information.
-
-### Examples:
-```
-Lightwave.exe PID 5268 debug
-
-Lightwave.exe EXEC "C:/program files/internet explorer/iexplore.exe" debug
-
-Lightwave.exe EXEC "powershell.exe -windowstyle hidden" debug
+lightwave.exe targetpid [debug]
 ```
