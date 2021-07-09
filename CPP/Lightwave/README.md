@@ -24,6 +24,9 @@ However, if multiple threads are in the alertable state, you may get multiple be
 I have had a great deal of luck with Firefox (the main process can sometimes have over 70 threads, and is heavily I/O bound - I got about 8 beacons back); other browsers and network-heavy applications 
 are ideal as well.
 
+You can use the `SearchLight` tool contained in this repository to identify processes with high thread counts and the right permissions - it doen't do anything malicious, and is entirely idempotent.
+AV/EDR does not flag on it.
+
 Additionally, it is important to note that if the thread you're in dies, your beacon/shell will as well, so you should try to migrate ASAP (I have not experienced this while testing with injecting into `firefox.exe`, but I
 am told that it can happen)
 
