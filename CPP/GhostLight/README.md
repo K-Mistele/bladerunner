@@ -1,5 +1,5 @@
 # GhostLight
-** Ghostlight uses the `CreateRemoteThread` injection technique. This will gets caught by Crowdstrike despite the custom syscalls. It may make it past 
+**Ghostlight uses the** `CreateRemoteThread` **injection technique. This will gets caught by Crowdstrike despite the custom syscalls. It may make it past 
 other less sophisticated EDRs and AVs that are only doing API hooking or DLL injection and are not tracking additional telemetry or kernel-mode hooking** 
 
 GhostLight is a C++ shellcode loader that uses kernel system calls to inject shellcode into a process. 
