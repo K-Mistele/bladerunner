@@ -11,10 +11,20 @@ Lightwave is a C++ shellcode loader that uses `NtQueueApcThread` to inject shell
 5. Iterate across threads, Queuing an APC for each.
 
 ## Caveats
-Note that this technique not guarantee execution: there must be at least one thread in the target process in an alertable state. 
-The more threads that a process has, the more likely you are to find one in the right state. However, if multiple threads are in the alertable state, you may get multiple beacons/shells.
+Note that this technique not guarantee execution: there must be at least one thread in the target process in an alertable state. This only occurs when a thread has called one of the following functions
+with the correct flags:
+* `SleepEx`
+* `WaitForSingleObjectEx`
+* `WaitForMultipleObjectsEx`
+* `SignalObjectAndWait`
+* `MsgWaitForMultipleObjectsEx`
 
-Additionally, if the thread you're in dies, your beacon/shell will as well, so you should try to migrate ASAP (I have not experienced this while testing with injecting into `firefox.exe`, but I
+Clearly, I/O bound processes are ideal. Additionally, the more threads that a process has, the more likely you are to find one in the right state. 
+However, if multiple threads are in the alertable state, you may get multiple beacons/shells. 
+I have had a great deal of luck with Firefox (the main process can sometimes have over 70 threads, and is heavily I/O bound - I got about 8 beacons back); other browsers and network-heavy applications 
+are ideal as well.
+
+Additionally, it is important to note that if the thread you're in dies, your beacon/shell will as well, so you should try to migrate ASAP (I have not experienced this while testing with injecting into `firefox.exe`, but I
 am told that it can happen)
 
 
