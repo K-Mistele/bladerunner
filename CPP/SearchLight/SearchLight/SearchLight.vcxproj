@@ -139,7 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="procenum.cpp" />
     <ClCompile Include="SearchLight.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="procenum.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

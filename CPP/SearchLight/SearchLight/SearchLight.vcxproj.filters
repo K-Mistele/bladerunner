@@ -18,5 +18,13 @@
     <ClCompile Include="SearchLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="procenum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="procenum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
