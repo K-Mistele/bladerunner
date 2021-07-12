@@ -1,5 +1,4 @@
 # SearchLight
-Provides headers to perform various enumerations. Included:
 
 ## Process Enumeration
 Search for injectable processes (i.e. processes that code can be opened and written to) and enumerates the number of threads. This is useful for APC Queue Injection techniques - the more threads a 

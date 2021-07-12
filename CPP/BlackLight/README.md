@@ -22,7 +22,7 @@ This loader does _not_ use process injection, it is a standalone loader and will
 3. Allocate memory in the current process in `PAGE_READWRITE` mode
 4. Write the shellcode to memory
 5. Change the memory protections on the shellcode to `PAGE_EXECUTE_READ`
-6. Queue and APC thread to execute the shellcode
+6. Queue an APC for the main thread to execute the shellcode
 7. Call `NtTestAlert` to force the process to flush the APC Queue and execute the shellcode
 
 ## Customization
