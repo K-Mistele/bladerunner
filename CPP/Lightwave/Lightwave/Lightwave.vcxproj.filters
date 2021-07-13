@@ -18,15 +18,15 @@
     <ClCompile Include="Lightwave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="base64.cpp">
+    <ClCompile Include="..\..\_resources\base64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="base64.h">
+    <ClInclude Include="syscalls4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="syscalls4.h">
+    <ClInclude Include="..\..\_resources\base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
