@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "sandbox_detection.h"
+#include "decryption.h"
 #include <Windows.h>
 
 using std::string;
@@ -14,11 +15,33 @@ using std::endl;
 
 int main()
 {
-    cout << "Beginning sandbox detection" << endl;
+    cout << "Beginning decryption tests" << endl;
+    unsigned char* buf = new unsigned char[10];
+    strcpy((char*) buf, "\x01\xFF\x01\xFF\x01\xFF\x01\xFF\x01");
+
+    unsigned char* decrypted1 = decryption::decryptXOR('\xFE', buf, 9);
+    if (strcmp((char*) "\xFF\x01\xFF\x01\xFF\x01\xFF\x01\xFF", (char*)decrypted1) == 0) {
+        cout << "XOR decryption finished successfully!" << endl;
+    }
+    else {
+        cout << "XOR decryption failed!" << endl;
+    }
+
+    unsigned char* decrypted2 = decryption::decryptKey((unsigned char*)"\xFE\x01", 2, buf, 9);
+    if (strcmp((char*) "\xFF\xFE\xFF\xFE\xFF\xFE\xFF\xFE\xFF", (char*)decrypted2) == 0) {
+        cout << "Decrypt key finished successfully!" << endl;
+    }
+    else {
+        cout << "decrypt key failed" << endl;
+    }
+
+
+
+    cout << "Beginning sandbox detection tests" << endl;
     sandboxDetection::requireJoinedToDomain((char*) "EC2AMAZ-L3L7VAE");
     sandboxDetection::requireResolvableDomainName((char*)"google.com");
     sandboxDetection::requireNotWine();
-	
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
