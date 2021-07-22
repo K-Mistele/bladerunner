@@ -25,3 +25,23 @@ namespace registry {
 	/// <returns>Boolean indicating if the key exists</returns>
 	bool keyExists(HKEY topLevelKey, LPCSTR subKey);
 }
+
+namespace filesystem {
+
+	/// <summary>
+	/// Check if a file exists
+	/// </summary>
+	/// <param name="fileAbsolutePath">The absolute path to the file, e.g. C:\windows\system32\cmd.exe</param>
+	/// <returns></returns>
+	bool fileExists(LPCSTR fileAbsolutePath);
+}
+
+namespace hardware {
+
+	/// <summary>
+	/// Pass in a pointer to 3 bytes and check if the device has a MAC address beginning with the given bytes
+	/// </summary>
+	/// <param name="macVendorBytes">The bytes to look for in MAC addresses</param>
+	/// <returns></returns>
+	bool macVendorMatches(char* macVendorBytes);
+}

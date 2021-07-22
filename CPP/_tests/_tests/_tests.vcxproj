@@ -141,13 +141,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\_resources\decryption.cpp" />
-    <ClCompile Include="..\..\_resources\registry.cpp" />
+    <ClCompile Include="..\..\_resources\utils.cpp" />
     <ClCompile Include="..\..\_resources\sandbox_detection.cpp" />
     <ClCompile Include="_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\_resources\decryption.h" />
-    <ClInclude Include="..\..\_resources\registry.h" />
+    <ClInclude Include="..\..\_resources\utils.h" />
     <ClInclude Include="..\..\_resources\sandbox_detection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

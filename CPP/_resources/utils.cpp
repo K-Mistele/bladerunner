@@ -1,4 +1,5 @@
-#include "registry.h"
+
+#include "utils.h"
 #include <Windows.h>
 #include <cstring>
 #include <string>
@@ -7,6 +8,10 @@
 using std::cout;
 using std::endl;
 using std::string;
+
+///////////////////////////////////////////////////////////////////////////////
+// NOTE THAT SOME DETECTIONS ARE FROM https://github.com/dsnezhkov/pufferfish
+///////////////////////////////////////////////////////////////////////////////
 
 namespace registry {
 
@@ -22,19 +27,9 @@ namespace registry {
 		}
 		// TODO: PROCESS AND SEARCH THROUGH, MAY REQUIRE ADDITIONAL SEARCHING
 		bool dataFound = false;
-		/* NAIVE METHOD THAT WON'T WORK FOR MULTI_SZ'S 
-		char* needle_buf = new char[outDataSize + 1];
-		strncpy(needle_buf, outData, outDataSize);
-		string haystack = string(needle_buf);
-		string needle = string(toMatch);
-
-		if (haystack.find(needle) != string::npos) {
-			dataFound = true;
-		}
-		*/
 		size_t i = 0; // INDEX IN REGISTRY VALUE DATA
 		size_t j = 0; // REGISTRY IN SEARCH TERM
-		char* haystack = outData; // THIS IS A RENAMING, DO NOT DELETE THIS OR YOU WILL GET A DOUBLE-FREE ERROR
+		char* haystack = outData; // THIS IS A RENAMING, DO NOT DELETE][] THIS OR YOU WILL GET A DOUBLE-FREE ERROR
 		char* needle = (char*) toMatch;
 		size_t haystackLen = outDataSize;
 		size_t needleLen = strlen(needle);
@@ -43,7 +38,6 @@ namespace registry {
 		for (i = 0; i < outDataSize; i++) {
 			
 			while (i < haystackLen && j < needleLen && (i + j) < haystackLen && haystack[i + j] == needle[j]) {
-				cout << i << ", " << j << endl;
 				if (j == needleLen - 1) {
 					cout << "match found at " << i << ", " << j << endl;
 					dataFound = true;
@@ -69,4 +63,15 @@ namespace registry {
 		RegCloseKey(keyHandle);
 		return result == ERROR_SUCCESS;
 	}
+}
+
+namespace filesystem {
+
+	bool fileExists(LPCSTR fileAbsolutePath) {
+		return GetFileAttributesA(fileAbsolutePath) != INVALID_FILE_ATTRIBUTES;
+	}
+}
+
+namespace hardware {
+	
 }

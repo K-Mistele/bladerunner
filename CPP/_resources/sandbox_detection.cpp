@@ -5,13 +5,19 @@
 #include <cstring>
 #include <Windows.h>
 #include <WinDNS.h>
-#include "registry.h"
+#include "utils.h"
+#include <TlHelp32.h>
 
 
 
 using std::string;
 using std::cout;
 using std::endl;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// NOTE THAT MOST DETECTIONS ARE FROM https://github.com/dsnezhkov/pufferfish
+///////////////////////////////////////////////////////////////////////////////
 
 namespace sandboxDetection {
 
@@ -130,6 +136,126 @@ namespace sandboxDetection {
 			internal::debug("detected VirtualBox via Guest Additions registry key");
 			isVbox = true;
 		}
+
+		if (registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\Description\\System", "VideoBiosVersion", "VIRTUALBOX")) {
+			internal::debug("detected VirtualBox via Video Bios-related registry key");
+			isVbox = true;
+		}
+
+		if (registry::keyExists(HKEY_LOCAL_MACHINE, "HARDWARE\\ACPI\\DSDT\\VBOX__") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "HARDWARE\\ACPI\\FADT\\VBOX__") || 
+			registry::keyExists(HKEY_LOCAL_MACHINE, "HARDWARE\\ACPI\\RSDT\\VBOX__")) {
+			internal::debug("detected VirtualBox via ACPI registry key");
+			isVbox = true;
+		}
+
+		// CHECK FOR REGISTRY KEYS RELATED TO VIRTUAL BOX SERVICES
+		string strs[5];
+		strs[0] = "SYSTEM\\ControlSet001\\Services\\VBoxGuest";
+		strs[1] = "SYSTEM\\ControlSet001\\Services\\VBoxMouse";
+		strs[2] = "SYSTEM\\ControlSet001\\Services\\VBoxService";
+		strs[3] = "SYSTEM\\ControlSet001\\Services\\VBoxSF";
+		strs[4] = "SYSTEM\\ControlSet001\\Services\\VBoxVideo";
+		for (size_t i = 0; i < 5; i++) {
+			if (registry::keyExists(HKEY_LOCAL_MACHINE, strs[i].c_str())) {
+				internal::debug("detected virtualbox by related service");
+				isVbox = true;
+				break;
+			}
+		}
+
+		// DETECT BASED ON SYSTEM BIOS DATA
+		if (registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System", "SystemBiosDate", "06/23/99")) {
+			internal::debug("detected Virtual Box by BIOS data");
+			isVbox = true;
+		}
+
+		// DETECT BASED ON VIRTUALBOX DRIVER FILES
+		string files[4];
+		files[0] = "C:\\WINDOWS\\system32\\drivers\\VBoxMouse.sys";
+		files[1] = "C:\\WINDOWS\\system32\\drivers\\VBoxGuest.sys";
+		files[2] = "C:\\WINDOWS\\system32\\drivers\\VBoxSF.sys";
+		files[3] = "C:\\WINDOWS\\system32\\drivers\\VBoxVideo.sys";
+		for (size_t i = 0; i < 4; i++) {
+			if (GetFileAttributesA(files[i].c_str()) != INVALID_FILE_ATTRIBUTES) {
+				internal::debug("detected Virtual Box by system driver file " + files[i]);
+				isVbox = true;
+				break;
+			}
+		}
+
+		// DETECT BASED ON OTHER SYSTEM FILES
+		string files2[14];
+		files2[0] = "C:\\WINDOWS\\system32\\vboxdisp.dll";
+		files2[1] = "C:\\WINDOWS\\system32\\vboxhook.dll";
+		files2[2] = "C:\\WINDOWS\\system32\\vboxmrxnp.dll";
+		files2[3] = "C:\\WINDOWS\\system32\\vboxogl.dll";
+		files2[4] = "C:\\WINDOWS\\system32\\vboxoglarrayspu.dll";
+		files2[5] = "C:\\WINDOWS\\system32\\vboxoglcrutil.dll";
+		files2[6] = "C:\\WINDOWS\\system32\\vboxoglerrorspu.dll";
+		files2[7] = "C:\\WINDOWS\\system32\\vboxoglfeedbackspu.dll";
+		files2[8] = "C:\\WINDOWS\\system32\\vboxoglpackspu.dll";
+		files2[9] = "C:\\WINDOWS\\system32\\vboxoglpassthroughspu.dll";
+		files2[10] = "C:\\WINDOWS\\system32\\vboxservice.exe";
+		files2[11] = "C:\\WINDOWS\\system32\\vboxtray.exe";
+		files2[12] = "C:\\WINDOWS\\system32\\VBoxControl.exe";
+		files2[13] = "C:\\program files\\oracle\\virtualbox guest additions\\";
+		for (size_t i = 0; i < 14; i++) {
+			if (filesystem::fileExists(files2[i].c_str())) {
+				internal::debug("detected virtual box by system file " + files2[i]);
+				isVbox = true;
+				break;
+			}
+		}
+
+		// DETECT VIRTUALBOX MAC ADDRESS
+		//if (hardware::macVendorMatches((char*) "\x08\x00\x27")) {
+		//	internal::debug("Detected a likely virtualbox MAC address");
+		//	isVbox = true;
+		//}
+
+		// DETECT VIRTUALBOX DEVICES
+		HANDLE h;
+		string devices[4];
+		devices[0] = "\\\\.\\VBoxMiniRdrDN";
+		devices[1] = "\\\\.\\pipe\\VBoxMiniRdDN";
+		devices[2] = "\\\\.\\VBoxTrayIPC";
+		devices[3] = "\\\\.\\pipe\\VBoxTrayIPC";
+		for (size_t i = 0; i < 4; i++) {
+			h = CreateFileA(devices[i].c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (h != INVALID_HANDLE_VALUE) {
+				internal::debug("Detected virtualbox via device " + devices[i]);
+				isVbox = true;
+			}
+		}
+		
+		// CHECK FOR VIRTUALBOX PROCESSES
+		int res = false;
+		HANDLE hpSnap;
+		PROCESSENTRY32 pentry;
+
+		hpSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		if (hpSnap != INVALID_HANDLE_VALUE) {
+			pentry.dwSize = sizeof(PROCESSENTRY32);
+		}
+
+
+		if (!Process32First(hpSnap, &pentry)) {
+			CloseHandle(hpSnap);
+		}
+
+		do {
+			if (lstrcmpi(pentry.szExeFile, L"vboxservice.exe") == 0) {
+				internal::debug("VirtualBox traced using vboxservice.exe process");
+				isVbox = true;
+			}
+			if (lstrcmpi(pentry.szExeFile, L"vboxtray.exe") == 0) {
+				internal::debug("VirtualBox traced using vboxtray.exe process");
+				isVbox = true;
+			}
+		} while (Process32Next(hpSnap, &pentry));
+		
+
 
 		if (isVbox) {
 			exit(0);

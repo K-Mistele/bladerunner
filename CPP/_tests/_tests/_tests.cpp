@@ -5,8 +5,10 @@
 #include <string>
 #include "sandbox_detection.h"
 #include "decryption.h"
-#include "registry.h"
+#include "utils.h"
 #include <Windows.h>
+
+
 
 using std::string;
 using std::cout;
