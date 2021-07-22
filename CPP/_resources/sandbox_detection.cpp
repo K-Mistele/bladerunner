@@ -263,4 +263,63 @@ namespace sandboxDetection {
 
 		internal::debug("VirtualBox check Passed");
 	}
+
+	void requireNotVmware() {
+
+		bool isVmware = false;
+		// TEST FOR COMMON VMWARE REG KEYS
+		if (
+			registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 0\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", "Identifier", "VMWARE") ||
+			registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 1\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", "Identifier", "VMWARE") ||
+			registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 2\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", "Identifier", "VMWARE")
+			) {
+			internal::debug("Detected Vmware via Scsi-related registry key");
+			isVmware = true;
+		}
+
+		// CHECK FOR VMWARE TOOLS REG KEY
+		if (registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\VMware, Inc.\\VMware Tools")) {
+			internal::debug("Detected Vmware via Vmware tools reg key");
+			isVmware = true;
+		}
+
+		// CHECK FOR VMWARE SYS FILES
+		if (
+			filesystem::fileExists("C:\\WINDOWS\\system32\\drivers\\vmmouse.sys") ||
+			filesystem::fileExists("C:\\WINDOWS\\system32\\drivers\\vmhgfs.sys")
+			) {
+			internal::debug("Detected Vmware via sys files");
+			isVmware = true;
+		}
+
+		// CHECK FOR VMWARE DEVICES
+		HANDLE h;
+		string devices[2];
+		devices[0] = "\\\\.\\HGFS";
+		devices[1] = "\\\\.\\vmci";
+		for (size_t i = 0; i < 2; i++) {
+			h = CreateFileA(devices[i].c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (h != INVALID_HANDLE_VALUE) {
+				internal::debug("Detected Vmware via related device");
+			}
+		}
+
+
+		if (isVmware) exit(0);
+	}
+
+	void requireNotBochsEmulator() {
+		bool isBochs = false;
+
+		// UNFORTUNATELY, CAN'T IMPLEMENT A LOT OF THE CPU CHECKS IN https://github.com/dsnezhkov/pufferfish/blob/master/pafish/bochs.c 
+		// SINCE VISUAL STUDIO DOESN'T ALLOW INLINE ASSEMBLY
+
+		// CHECK FOR COMMON BOCHS REG KEYS
+		if (registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\Description\\System", "SystemBiosVersion", "BOCHS")) {
+			internal::debug("Detected Bochs emulator via reg key");
+			isBochs = true;
+		}
+
+		if (isBochs) exit(0);
+	}
 }
