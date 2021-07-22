@@ -385,4 +385,13 @@ namespace sandboxDetection {
 
 		internal::debug("Computer name check passed");
 	}
+
+	void requireFileExists(char* fileAbsolutePath) {
+		
+		if (!filesystem::fileExists(fileAbsolutePath)) {
+			internal::debug("expected filed didnt't exist");
+			exit(0);
+		}
+		internal::debug("File exists check passed");
+	}
 }

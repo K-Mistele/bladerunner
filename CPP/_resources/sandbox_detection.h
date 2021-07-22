@@ -74,18 +74,13 @@ namespace sandboxDetection {
 	void requireNotQemu();
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that a process does not have a debugger attached. Calls exit(0) if check fails.
+	/// Require that a process does not have a debugger attached. Calls exit(0) if check fails.
 	/// </summary>
 	/// <returns></returns>
 	void requireNoDebuggerAttached();
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that a certain registry key exists. Calls exit(0) if check fails.
-	/// </summary>
-	void requireRegKeyExists(char*);
-
-	/// <summary>
-	/// NOT IMPLEMENTED Require that a certain file exists. Calls exit(0) if check fails
+	/// Require that a certain file exists. Calls exit(0) if check fails
 	/// </summary>
 	void requireFileExists(char*);
 
