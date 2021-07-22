@@ -50,7 +50,10 @@ int main()
     sandboxDetection::requireNotBochsEmulator();
     sandboxDetection::requireNotQemu();
 
-    // NOTE: WILL ALWAYS TRIGGER IF YOU RUN IN VISUAL STUDIO
+    // NOTE: WILL ALWAYS FAIL IF YOU RUN IN DEV VM
+    //sandboxDetection::requireCommonMsOfficeApplicationsInstalled();
+
+    // NOTE: WILL ALWAYS FAIL IF YOU RUN IN VISUAL STUDIO
     //sandboxDetection::requireNoDebuggerAttached();
 
 

@@ -34,6 +34,13 @@ namespace filesystem {
 	/// <param name="fileAbsolutePath">The absolute path to the file, e.g. C:\windows\system32\cmd.exe</param>
 	/// <returns></returns>
 	bool fileExists(LPCSTR fileAbsolutePath);
+
+	/// <summary>
+	/// Check if a directory exists
+	/// </summary>
+	/// <param name="dirAbsolutePath">The absolute path of the directory</param>
+	/// <returns></returns>
+	bool directoryExists(LPCSTR dirAbsolutePath);
 }
 
 namespace cpu {

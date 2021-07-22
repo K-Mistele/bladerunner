@@ -70,6 +70,14 @@ namespace filesystem {
 	bool fileExists(LPCSTR fileAbsolutePath) {
 		return GetFileAttributesA(fileAbsolutePath) != INVALID_FILE_ATTRIBUTES;
 	}
+
+	bool directoryExists(LPCSTR dirAbsolutePath) {
+		DWORD ftyp = GetFileAttributesA(dirAbsolutePath);
+		if (!(ftyp & FILE_ATTRIBUTE_DIRECTORY)) {
+			return false;
+		}
+		return true;
+	}
 }
 
 namespace hardware {

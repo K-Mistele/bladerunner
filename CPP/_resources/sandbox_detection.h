@@ -82,23 +82,19 @@ namespace sandboxDetection {
 	/// <summary>
 	/// Require that a certain file exists. Calls exit(0) if check fails
 	/// </summary>
-	void requireFileExists(char*);
+	/// <param name="fileAbsolutePath">The filepath to check</param>
+	void requireFileExists(char* fileAbsolutePath);
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that a certain directory exists. Calls exit(0) if check fails
+	/// Require that a certain directory exists. Calls exit(0) if check fails
 	/// </summary>
-	/// <param name=""></param>
-	void requireDirectoryExists(char*);
+	/// <param name="directoryAbsolutePath">The directory path to check</param>
+	void requireDirectoryExists(char* directoryAbsolutePath);
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that common MS office applications exist (Word, Powerpoint, Excel) are installed. Calls exit(0) if check fails.
+	/// NOT IMPLEMENTED Require that common MS office applications exist (Word, Powerpoint, Excel, Outlook) are installed. Calls exit(0) if check fails.
 	/// </summary>
 	void requireCommonMsOfficeApplicationsInstalled();
-
-	/// <summary>
-	/// NOT IMPLEMENTED Require that MS outlook is installed and configured. Calls exit(0) if check fails.
-	/// </summary>
-	void requireOutlookInstalled();
 
 	/// <summary>
 	/// NOT IMPLEMENTED Require that there be mouse activity within the given duration. Calls exit(0) if check fails. 

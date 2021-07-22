@@ -394,4 +394,53 @@ namespace sandboxDetection {
 		}
 		internal::debug("File exists check passed");
 	}
+
+	void requireDirectoryExists(char* directoryAbsolutePath) {
+		
+		if (!filesystem::directoryExists(directoryAbsolutePath)) {
+			internal::debug("Directory check passed");
+			exit(0);
+		}
+		
+	}
+
+	void requireCommonMsOfficeApplicationsInstalled() {
+		bool officeRegKeysPresent = false;
+		bool installDirPresent = false;
+		bool classPresent = false;
+		bool appPathKeysPresent = false;
+
+		if (
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Office\\PowerPoint") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Office\\Word") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Office\\Excel") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\Microsoft\\Office\\Outlook")
+			) {
+			officeRegKeysPresent = true;
+		}
+
+
+		if (registry::keyExists(HKEY_CLASSES_ROOT, "Word.Application\CurVer")) {
+			classPresent = true;
+		}
+
+
+		if (registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\OUTLOOK.EXE") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\powerpnt.exe") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\excel.exe") ||
+			registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Winword.exe")) {
+			appPathKeysPresent = true;
+		}
+
+
+
+		if (officeRegKeysPresent || classPresent || appPathKeysPresent) {
+			internal::debug("Office common apps check passed");
+
+		}
+		else {
+			internal::debug("missing common office apps");
+			exit(0);
+		}
+	}
 }
