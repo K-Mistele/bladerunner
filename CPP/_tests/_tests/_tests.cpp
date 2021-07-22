@@ -5,6 +5,7 @@
 #include <string>
 #include "sandbox_detection.h"
 #include "decryption.h"
+#include "registry.h"
 #include <Windows.h>
 
 using std::string;
@@ -41,6 +42,17 @@ int main()
     sandboxDetection::requireJoinedToDomain((char*) "EC2AMAZ-L3L7VAE");
     sandboxDetection::requireResolvableDomainName((char*)"google.com");
     sandboxDetection::requireNotWine();
+
+    string subKey = "Environment";
+    string valueName = "TEMP";
+    string searchTerm = "AppData";
+    cout << "Beginning registry tests" << endl;
+    if (registry::keyValueExistsAndContainsStr(HKEY_CURRENT_USER, subKey.c_str(), valueName.c_str(), searchTerm.c_str())) {
+        cout << "Key found as expected" << endl;
+    }
+    else {
+        cout << "Failed to find HKCU\\Environment\\Path or value did not contain AppData as expected" << endl;
+    }
 
 }
 

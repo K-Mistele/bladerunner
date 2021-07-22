@@ -24,12 +24,18 @@
     <ClCompile Include="..\..\_resources\decryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\_resources\registry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\_resources\sandbox_detection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\_resources\decryption.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\_resources\registry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

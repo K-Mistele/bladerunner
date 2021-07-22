@@ -22,6 +22,7 @@ namespace sandboxDetection {
 		/// </summary>
 		/// <param name="msg"></param>
 		void debug(std::string msg);
+
 	}
 
 	/// <summary>

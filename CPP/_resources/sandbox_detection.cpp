@@ -5,6 +5,7 @@
 #include <cstring>
 #include <Windows.h>
 #include <WinDNS.h>
+#include "registry.h"
 
 
 
@@ -26,6 +27,8 @@ namespace sandboxDetection {
 		void debug(string msg) {
 			cout << "[+] " << msg << endl;
 		}
+
+
 	}
 
 	// TURN ON DEBUGGING
@@ -104,5 +107,8 @@ namespace sandboxDetection {
 			internal::debug("Failed to load kernel32, running in wine!");
 			exit(0);
 		}
+	}
+
+	void requireNotVbox() {
 	}
 }
