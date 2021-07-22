@@ -110,5 +110,25 @@ namespace sandboxDetection {
 	}
 
 	void requireNotVbox() {
+
+		// TEST FOR A BUNCH OF COMMON VIRTUALBOX REG KEYS
+		// https://github.com/dsnezhkov/pufferfish/blob/master/pafish/vbox.c
+
+		if (registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 0\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", "Identifier", "VBOX")) {
+			internal::debug("detected VirtualBox via hardware SCSI port-related registry key");
+			exit(0);
+		}
+
+		if (registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\Description\\System", "SystemBiosVersion", "VBOX")) {
+			internal::debug("detected VirtualBox via BIOS-related registry key");
+			exit(0);
+		}
+
+		if (registry::keyExists(HKEY_LOCAL_MACHINE, "SOFTWARE\\Oracle\\VirtualBox Guest Additions")) {
+			internal::debug("detected VirtualBox via Guest Additions registry key");
+			exit(0);
+		}
+
+		internal::debug("VirtualBox check Passed");
 	}
 }
