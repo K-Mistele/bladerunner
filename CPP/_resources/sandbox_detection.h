@@ -63,7 +63,7 @@ namespace sandboxDetection {
 	void requireNotVmware();
 
 	/// <summary>
-	///  NOT IMPLEMENTED Require that a process is not being sandboxed by QEMU
+	/// Require that a process is not being sandboxed by QEMU
 	/// </summary>
 	void requireNotQemu();
 

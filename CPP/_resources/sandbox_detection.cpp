@@ -7,6 +7,7 @@
 #include <WinDNS.h>
 #include "utils.h"
 #include <TlHelp32.h>
+#include <intrin.h>
 
 
 
@@ -306,6 +307,7 @@ namespace sandboxDetection {
 
 
 		if (isVmware) exit(0);
+		internal::debug("VmWare checks passed");
 	}
 
 	void requireNotBochsEmulator() {
@@ -321,5 +323,49 @@ namespace sandboxDetection {
 		}
 
 		if (isBochs) exit(0);
+		internal::debug("Bochs emulator checks passed");
+	}
+
+	void requireNotQemu() {
+
+		// CHECK FOR COMMON REG KEYS
+		bool isQemu = false;
+
+		if (registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 0\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", "Identifier", "QEMU") ||
+			registry::keyValueExistsAndContainsStr(HKEY_LOCAL_MACHINE, "HARDWARE\\Description\\System", "SystemBiosVersion", "QEMU")
+			) {
+			internal::debug("QEMU detected via reg key");
+			isQemu = true;
+		}
+
+
+		if (isQemu) exit(0);
+		internal::debug("QEMU checks passed");
+	}
+
+	void requireNoDebuggerAttached() {
+
+		bool isDebuggerAttached = false;
+
+		// USE WINDOWS API TO CHECK 
+		if (IsDebuggerPresent()) {
+			internal::debug("Determined that a debugger is present!");
+			isDebuggerAttached = true;
+		}
+
+		// TRY DOING SOMETHING THAT SHOULDN'T DROP AN ERROR IF WE'RE DEBUGGING
+		/* COMMENTING OUT BECAUSE CREATES FALSE POSITIVES
+		DWORD err = 99;
+		SetLastError(err);
+
+		OutputDebugStringA( "useless");
+		if (GetLastError() == err) {
+			internal::debug("Determined that a debugger is present via error handling!");
+			isDebuggerAttached = true;
+		}
+		*/
+
+		if (isDebuggerAttached) exit(0);
+		internal::debug("Passed debugger check!");
 	}
 }

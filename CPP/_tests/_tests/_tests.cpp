@@ -45,6 +45,12 @@ int main()
     sandboxDetection::requireResolvableDomainName((char*)"google.com");
     sandboxDetection::requireNotWine();
     sandboxDetection::requireNotVbox();
+    sandboxDetection::requireNotVmware();
+    sandboxDetection::requireNotBochsEmulator();
+    sandboxDetection::requireNotQemu();
+
+    // NOTE: WILL ALWAYS TRIGGER IF YOU RUN IN VISUAL STUDIO
+    //sandboxDetection::requireNoDebuggerAttached();
 
 }
 

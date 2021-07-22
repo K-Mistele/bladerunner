@@ -36,12 +36,7 @@ namespace filesystem {
 	bool fileExists(LPCSTR fileAbsolutePath);
 }
 
-namespace hardware {
+namespace cpu {
 
-	/// <summary>
-	/// Pass in a pointer to 3 bytes and check if the device has a MAC address beginning with the given bytes
-	/// </summary>
-	/// <param name="macVendorBytes">The bytes to look for in MAC addresses</param>
-	/// <returns></returns>
-	bool macVendorMatches(char* macVendorBytes);
+	
 }
