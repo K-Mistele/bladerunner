@@ -13,6 +13,15 @@ namespace registry {
 	/// <param name="subKey">The rest of the subkey, e.g. "HARDWARE\DEVICEMAP\Scsi\Scsi Port 0</param>
 	/// <param name="valueName">The name of the value to read, e.g. "Interrupt"</param>
 	/// <param name="toMatch">Check if the value contains this value</param>
-	/// <returns></returns>
+	/// <returns>Boolean indicating if the key exists and contains the given substring</returns>
 	bool keyValueExistsAndContainsStr(HKEY topLevelKey, LPCSTR subKey, LPCSTR valueName, LPCSTR toMatch);
+
+
+	/// <summary>
+	/// Check if a given registry key/subkey exists. 
+	/// </summary>
+	/// <param name="topLevelKey">The top-level key, e.g. HKEY_CURRENT_USER</param>
+	/// <param name="subKey">The rest of the subkey, e.g. "Environment"</param>
+	/// <returns>Boolean indicating if the key exists</returns>
+	bool keyExists(HKEY topLevelKey, LPCSTR subKey);
 }
