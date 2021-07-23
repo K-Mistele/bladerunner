@@ -44,6 +44,12 @@ namespace sandboxDetection {
 	void requireComputerName(char* computerName);
 
 	/// <summary>
+	/// Require that the current user has the specified username. Calls exit(0) if check fails.
+	/// </summary>
+	/// <param name="userName">The computer name to match against</param>
+	void requireUsername(char* username);
+
+	/// <summary>
 	/// NOT IMPLEMENTED Require that a certain domain name (A record) be resolvable. Great for intranet domain names to prevent cloud sandboxing. Calls exit(0) if check fails.
 	/// </summary>
 	/// <param name="domain">The domain name to attempt to resolve</param>
@@ -103,7 +109,7 @@ namespace sandboxDetection {
 	void requireMouseActivity(int duration);
 
 	/// <summary>
-	/// NOT IMPLEMENTED Requires that the process isn't running under one of the following usernames: MALWARE, VIRUS, SANDBOX (case-adjusted). Calls exit(0) if check fails.
+	/// Requires that the process isn't running under one of the following usernames: MALWARE, VIRUS, SANDBOX (case-adjusted). Calls exit(0) if check fails.
 	/// </summary>
 	void requireStdUsernameCheck();
 

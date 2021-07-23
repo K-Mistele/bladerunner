@@ -459,4 +459,25 @@ namespace sandboxDetection {
 			internal::debug("Mouse check passed");
 		}
 	}
+
+	void requireUsername(char* username) {
+
+		char* usernameCopy = new char[strlen(username) + 1];
+		strcpy(usernameCopy, username);
+		size_t UNAME_LEN_MAX = 256;
+		LPSTR currentUsername = new char[UNAME_LEN_MAX + 1];
+		DWORD currentUsernameLength = UNAME_LEN_MAX + 1;
+		BOOL success = GetUserNameA(currentUsername, &currentUsernameLength);
+
+		// LOWERCASE BOTH CHAR STRINGS
+		LPSTR currentUsernameLower = CharLowerA(currentUsername);
+		LPSTR usernameLower = CharLowerA(usernameCopy);
+		if (!success || strcmp(currentUsernameLower, usernameLower) != 0) {
+			internal::debug("Username check failed!");
+			cout << "username: " << currentUsernameLower << endl;
+			cout << "expected: " << usernameLower << endl;
+			exit(0);
+		}
+		internal::debug("Username check passed");
+	}
 }
