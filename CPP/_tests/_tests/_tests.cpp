@@ -51,6 +51,8 @@ int main()
     sandboxDetection::requireNotQemu();
     //sandboxDetection::requireMouseActivity(3);
     sandboxDetection::requireUsername((char*) "administrator");
+    sandboxDetection::requireStdUsernameCheck();
+    sandboxDetection::requireStdPathCheck();
 
     // NOTE: WILL ALWAYS FAIL IF YOU RUN IN DEV VM
     //sandboxDetection::requireCommonMsOfficeApplicationsInstalled();

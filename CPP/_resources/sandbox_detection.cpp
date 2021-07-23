@@ -474,10 +474,78 @@ namespace sandboxDetection {
 		LPSTR usernameLower = CharLowerA(usernameCopy);
 		if (!success || strcmp(currentUsernameLower, usernameLower) != 0) {
 			internal::debug("Username check failed!");
-			cout << "username: " << currentUsernameLower << endl;
-			cout << "expected: " << usernameLower << endl;
+			delete[] usernameCopy;
 			exit(0);
 		}
 		internal::debug("Username check passed");
+		delete[] usernameCopy;
+	}
+
+	void requireStdUsernameCheck() {
+
+		size_t UNAME_LEN_MAX = 256;
+		LPSTR currentUsername = new char[UNAME_LEN_MAX + 1];
+		DWORD currentUsernameLength = UNAME_LEN_MAX + 1;
+		string forbiddenUsernames[3];
+		forbiddenUsernames[0] = "malware";
+		forbiddenUsernames[1] = "sandbox";
+		forbiddenUsernames[2] = "virus";
+		BOOL success = GetUserNameA(currentUsername, &currentUsernameLength);
+		if (!success) {
+			internal::debug("Username check failed, failed to get username");
+			exit(0);
+		}
+
+		LPSTR currentUsernameLower = CharLowerA(currentUsername);
+		for (size_t i = 0; i < 3; i++) {
+			
+			
+			if (strcmp(currentUsernameLower, forbiddenUsernames[i].c_str()) == 0) {
+				internal::debug("std username check failed");
+				exit(0);
+			}
+		}
+		internal::debug("Std username check passed");
+	}
+
+	void requireStdPathCheck() {
+
+		size_t MAX_PATH_VAR = 2047;
+		string varName = "PATH";
+		DWORD pathBufferLength = MAX_PATH_VAR + 1;
+		char* pathBuffer = new char[MAX_PATH_VAR + 1];
+		DWORD currentModulePathLength = MAX_PATH + 1;
+		char* currentModulePath = new char[MAX_PATH + 1];
+
+		DWORD pathStrLength = GetEnvironmentVariableA(varName.c_str(), pathBuffer, pathBufferLength);
+		currentModulePathLength = GetModuleFileNameA(NULL, currentModulePath, currentModulePathLength);
+
+		string badWords[4];
+		badWords[0] = "malware";
+		badWords[1] = "virus";
+		badWords[2] = "sandbox";
+		badWords[3] = "sample";
+
+		
+		char* pathBufferLower = CharLowerA(pathBuffer);
+		char* currentModulePathLower = CharLowerA(currentModulePath);
+
+		string path = pathBufferLower;
+		string modulePath = currentModulePathLower;
+		for (size_t i = 0; i < 4; i++) {
+			if (
+				path.find(badWords[i]) != string::npos || 
+				modulePath.find(badWords[i]) != string::npos
+				) {
+				internal::debug("Std path check failed");
+				exit(0);
+			}
+
+		}
+
+		internal::debug("Std path check passed");
+		// END: CLEANUP
+		delete[] pathBuffer;
+		delete[] currentModulePath;
 	}
 }
