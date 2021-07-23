@@ -49,6 +49,7 @@ int main()
     sandboxDetection::requireNotVmware();
     sandboxDetection::requireNotBochsEmulator();
     sandboxDetection::requireNotQemu();
+    sandboxDetection::requireMouseActivity(3);
 
     // NOTE: WILL ALWAYS FAIL IF YOU RUN IN DEV VM
     //sandboxDetection::requireCommonMsOfficeApplicationsInstalled();

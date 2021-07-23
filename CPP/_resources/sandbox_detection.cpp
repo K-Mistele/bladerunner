@@ -443,4 +443,20 @@ namespace sandboxDetection {
 			exit(0);
 		}
 	}
+
+	void requireMouseActivity(int duration) {
+		POINT position1, position2;
+		GetCursorPos(&position1);
+		Sleep(duration * 1000); /* Sleep time */
+		GetCursorPos(&position2);
+		if ((position1.x == position2.x) && (position1.y == position2.y)) {
+			/* No mouse activity during the sleep */
+			internal::debug("Mouse check failed");
+			exit(0);
+		}
+		else {
+			/* Mouse activity during the sleep */
+			internal::debug("Mouse check passed");
+		}
+	}
 }
