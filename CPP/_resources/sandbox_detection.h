@@ -114,19 +114,12 @@ namespace sandboxDetection {
 	void requireStdUsernameCheck();
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that the path doesn't contain obvious indicators like SAMPLE, SANDBOX, VIRUS. Calls exit(0) if check fails. 
+	/// Require that the path doesn't contain obvious indicators like SAMPLE, SANDBOX, VIRUS. Calls exit(0) if check fails. 
 	/// </summary>
 	void requireStdPathCheck();
 
-
 	/// <summary>
-	/// NOT IMPLEMENTED Require that the filename is not an obvious value like sample.exe, malware.exe. Optionally specify a string to require that the executable name matches. Calls exit(0) if the check fails.
-	/// </summary>
-	/// <param name="exeName">Optional executable name to match.</param>
-	void requireStdExeNameCheck(char* exeName);
-
-	/// <summary>
-	/// NOT IMPLEMENTED Require that the hard disk is of a reasonable size. Calls exit(0) if check fails. Calls exit(0) if check fails.
+	/// Require that the hard disk for C:\ is of a reasonable size. Calls exit(0) if check fails. Calls exit(0) if check fails.
 	/// </summary>
 	void requireStdDriveSizeCheck();
 

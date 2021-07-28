@@ -16,7 +16,7 @@ using std::endl;
 
 
 
-int main()
+int main(int argc, char** argv)
 {
     cout << "Beginning decryption tests" << endl;
     unsigned char* buf = new unsigned char[10];

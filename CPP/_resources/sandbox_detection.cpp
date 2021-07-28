@@ -548,4 +548,5 @@ namespace sandboxDetection {
 		delete[] pathBuffer;
 		delete[] currentModulePath;
 	}
+
 }
