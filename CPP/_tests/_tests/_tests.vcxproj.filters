@@ -15,30 +15,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BlackLight.cpp">
+    <ClCompile Include="_tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\_resources\base64.cpp">
+    <ClCompile Include="..\..\_resources\sandbox_detection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\_resources\decryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\_resources\utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="syscalls2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\_resources\base64.h">
+    <ClInclude Include="..\..\_resources\sandbox_detection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\_resources\decryption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="syscalls2.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
+    <ClInclude Include="..\..\_resources\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
