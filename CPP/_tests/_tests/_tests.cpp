@@ -53,6 +53,7 @@ int main(int argc, char** argv)
     sandboxDetection::requireUsername((char*) "administrator");
     sandboxDetection::requireStdUsernameCheck();
     sandboxDetection::requireStdPathCheck();
+    sandboxDetection::requireStdDriveSizeCheck(40, 4);
 
     // NOTE: WILL ALWAYS FAIL IF YOU RUN IN DEV VM
     //sandboxDetection::requireCommonMsOfficeApplicationsInstalled();

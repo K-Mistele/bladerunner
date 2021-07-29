@@ -119,9 +119,13 @@ namespace sandboxDetection {
 	void requireStdPathCheck();
 
 	/// <summary>
-	/// Require that the hard disk for C:\ is of a reasonable size. Calls exit(0) if check fails. Calls exit(0) if check fails.
+	/// Require that the hard disk for C:\ has the specified minimum size and miniumu free size. Note that values are rounded down.
+	/// For example, if a disk has 49.9 GB, the check will assume it has 49 due to limitations of bit shift arithmetic.
+	/// Calls exit(0) if check fails. 
 	/// </summary>
-	void requireStdDriveSizeCheck();
+	/// <param name="minDiskSizeGb">The minimum disk size in GB to allow without exiting</param>
+	/// <param name="minFreeDiskSizeGb">The minimum free disk space to allow without exiting </param>
+	void requireStdDriveSizeCheck(int minDiskSizeGb, int minFreeDiskSizeGb);
 
 	/// <summary>
 	/// NOT IMPLEMENTED Require that the sleep command isn't patched, which commonly happens in a sandbox. Calls exit(0) if check fails. 

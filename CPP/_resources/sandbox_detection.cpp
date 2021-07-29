@@ -549,4 +549,36 @@ namespace sandboxDetection {
 		delete[] currentModulePath;
 	}
 
+	void requireStdDriveSizeCheck(int minDiskSizeGb, int minFreeDiskSizeGb) {
+
+		// CREATE 64-BIT INTEGERS TO RECEIVE NUMBERS FROM THE API CALL
+		ULARGE_INTEGER freeBytesAvailableToCaller, totalNumberOfBytes, totalNumberOfFreeBytes; 
+
+		BOOL success = GetDiskFreeSpaceExA("C:\\", &freeBytesAvailableToCaller, &totalNumberOfBytes, &totalNumberOfFreeBytes);
+		if (!success) {
+			internal::debug("Failed to get disk size");
+			exit(0);
+		}
+		
+		// CONVERT BYTES TO GB VIA BIT SHIFT
+		// DIVIDING BY 1024 IS A LSR OF 10 (>> 10), AND CONVERTING FROM BYTES TO GB REQUIRES THIS 3 TIMES, HENCE AN LSR OF 30
+		ULONGLONG freeGigabytes, totalGigabytes;
+		freeGigabytes = totalNumberOfFreeBytes.QuadPart >> 30; // DIVIDE BY 1024 IS A LSR 10 ( >> 10), DIVIDE BY 1024 3X TO GO FROM BYTES TO KB, KB TO MB, MB TO GB
+		totalGigabytes = totalNumberOfBytes.QuadPart >> 30;
+		
+		// NOW THAT THE 64-BIT INTEGERS ARE SUFFICIENTLY SMALL, COPY THEM INTO UNSIGNED INTS SO WE CAN COMPARE THEM
+		unsigned int totalDiskGb = totalGigabytes;
+		unsigned int freeDiskGb = freeGigabytes;
+
+		if (minDiskSizeGb > totalDiskGb) {
+			internal::debug("Minimum disk size check failed");
+			exit(0);
+		}
+		if (minFreeDiskSizeGb > freeDiskGb) {
+			internal::debug("Minimum free disk space check failed!");
+			exit(0);
+		}
+		internal::debug("Disk size check passed");
+	}
+
 }
