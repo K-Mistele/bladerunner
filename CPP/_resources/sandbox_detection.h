@@ -149,21 +149,12 @@ namespace sandboxDetection {
 	/// </summary>
 	/// <param name="minutes">The amount of minutes. default is 12.</param>
 	void requireSystemUptime(int minutes=12);
-
-	/// <summary>
-	/// Require that the system is not in auckoo sandbox. Calls exit(0) if the check fails.
-	/// </summary>
-	void requireNotCuckooSandbox();
-
-	/// <summary>
-	/// NOT IMPLEMENTED Require that the CPU is not manufactured by manufacturer returned by VMs - Hyper-V, Vmware, Xen, Parallels, Virtualbox. Calls exit(0) if the check fails.
-	/// </summary>
-	void requireNotCpuIsVm();
 	
 	/// <summary>
-	/// NOT IMPLEMENTED Require that a printer is installed. Calls exit(0) if the check fails. 
+	/// Require that a printer is installed. Calls exit(0) if the check fails. 
 	/// </summary>
-	void requirePrinterInstalled();
+	/// <param name="printerSubstring">Part or all of the name of the printer to check for, case-sensitive</param>
+	void requirePrinterInstalled(string printerSubstring);
 
 	/// <summary>
 	/// Require that the process is not running in the Bochs hardware emulator. Calls exit(0) if the check fails.

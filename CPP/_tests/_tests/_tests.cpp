@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     sandboxDetection::requireSleepIsNotPatched();
     sandboxDetection::requireMinimumNumProcessors(2); // SHOULD BE 4 AT LEAST FOR MOST CASES BUT TESTING ON A VM WHICH IN FACT ONLY HAS 1 PROCESSOR
     sandboxDetection::requireMinimumGbMemory(4);
-
+    sandboxDetection::requirePrinterInstalled();
     // NOTE: WILL ALWAYS FAIL IF YOU RUN IN DEV VM
     //sandboxDetection::requireCommonMsOfficeApplicationsInstalled();
 

@@ -636,21 +636,15 @@ namespace sandboxDetection {
 
 	}
 
-	void requireNoVhdNativeBoot() {
-		BOOL isNative = FALSE;
+	void requirePrinterInstalled(string printerSubstring) {
 
-		IsNativeVhdBoot fnnative = (IsNativeVHDBoot)GetProcAddress(
-			GetModuleHandleA("kernel32", "IsNativeVhdBoot");
-		)
-		if (fnnative) {
-			fnnative(&isNative);
-		}
+		DWORD printerInfoByteSize = sizeof(PRINTER_INFO_1) * 40;	// SPACE FOR 40 PRINTER_INFO_1 structures
+		LPBYTE printerInfo = new BYTE[printerInfoByteSize];
+		
 
-		if (isNative) {
-			internal::debug("Is native VHD boot check failed");
-			exit(0);
-		}
+		DWORD bytesOut, printerCount;
 
-		internal::dbeug("Is native VHD book check passed");
+		BOOL success = EnumPrintersA(PRINTER_ENUM_CATEGORY_ALL, NULL, 1, printerInfo, printerInfoByteSize, &bytesOut, &printerCount);
 	}
+
 }
