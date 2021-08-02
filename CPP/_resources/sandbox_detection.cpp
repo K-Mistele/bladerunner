@@ -581,4 +581,76 @@ namespace sandboxDetection {
 		internal::debug("Disk size check passed");
 	}
 
+	void requireSleepIsNotPatched() {
+		DWORD start = GetTickCount();
+		Sleep(500);
+		if ((GetTickCount() - start) < 450) {
+			internal::debug("Sleep is patched!");
+			exit(0);
+		}
+
+		internal::debug("Sleep patch check passed");
+	}
+
+	void requireMinimumNumProcessors(int numProcessors) {
+		SYSTEM_INFO sysInfo;
+		GetSystemInfo(&sysInfo);
+
+		if (sysInfo.dwNumberOfProcessors < numProcessors) {
+			internal::debug("Processor count check failed");
+			exit(0);
+		}
+
+		internal::debug("Processor count check passed");
+	}
+
+	void requireMinimumGbMemory(int n) {
+		
+		// WEIRD EXPRESSION TO PREVENT SUB-EXPRESSION OVERVLOW
+		ULONGLONG expectedSystemMemoryInKb = n;
+		expectedSystemMemoryInKb = expectedSystemMemoryInKb * 1024 * 1024;
+		ULONGLONG systemMemoryInKb;
+		GetPhysicallyInstalledSystemMemory(&systemMemoryInKb);
+
+		if (expectedSystemMemoryInKb > systemMemoryInKb) {
+			internal::debug("Failed system memory check");
+			exit(0);
+		}
+
+		internal::debug("System Memory check passed");
+
+
+
+	}
+
+	void requireSystemUptime(int minutes) {
+		DWORD expectedUptimeInMs = minutes * 60 * 1000; // MINUTES * 60 = SECONDS * 1000 = MILLISECONDS
+		DWORD actualUptimeInMs = GetTickCount();
+
+		if (actualUptimeInMs < expectedUptimeInMs) {
+			internal::debug("Expected system uptime check failed");
+			exit(0);
+		}
+
+		internal::debug("System uptime check passed");
+
+	}
+
+	void requireNoVhdNativeBoot() {
+		BOOL isNative = FALSE;
+
+		IsNativeVhdBoot fnnative = (IsNativeVHDBoot)GetProcAddress(
+			GetModuleHandleA("kernel32", "IsNativeVhdBoot");
+		)
+		if (fnnative) {
+			fnnative(&isNative);
+		}
+
+		if (isNative) {
+			internal::debug("Is native VHD boot check failed");
+			exit(0);
+		}
+
+		internal::dbeug("Is native VHD book check passed");
+	}
 }

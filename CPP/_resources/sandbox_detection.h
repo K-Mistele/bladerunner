@@ -128,26 +128,27 @@ namespace sandboxDetection {
 	void requireStdDriveSizeCheck(int minDiskSizeGb, int minFreeDiskSizeGb);
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that the sleep command isn't patched, which commonly happens in a sandbox. Calls exit(0) if check fails. 
+	/// Require that the sleep command isn't patched, which commonly happens in a sandbox. Calls exit(0) if check fails. 
 	/// </summary>
 	void requireSleepIsNotPatched();
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that the system has at least n bytes of memory. Default is 8. Calls exit(0) if check fails.
+	/// Require that a target has a given number of processors to execute. Sanboxes and VMs are likely to only have one
+	/// </summary>
+	/// <param name="numProcessors">The minimum number of processors to require</param>
+	void requireMinimumNumProcessors(int numProcessors);
+
+	/// <summary>
+	/// Require that the system has at least n bytes of memory. Default is 8. Calls exit(0) if check fails.
 	/// </summary>
 	/// <param name="n">The minimum amount of memory in Gb</param>
 	void requireMinimumGbMemory(int n = 8);
 
 	/// <summary>
-	/// NOT IMPLEMENTED Require that the system has been up for a certain amount of time. Calls exit(0) if check fails
+	/// Require that the system has been up for a certain amount of time. Calls exit(0) if check fails
 	/// </summary>
 	/// <param name="minutes">The amount of minutes. default is 12.</param>
 	void requireSystemUptime(int minutes=12);
-
-	/// <summary>
-	/// NOT IMPLEMENTED Require that the system is not booting from a VHD. Calls exit(0) if the check fails. 
-	/// </summary>
-	void requireNoVhdNativeBoot();
 
 	/// <summary>
 	/// Require that the system is not in auckoo sandbox. Calls exit(0) if the check fails.
