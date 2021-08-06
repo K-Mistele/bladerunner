@@ -549,4 +549,102 @@ namespace sandboxDetection {
 		delete[] currentModulePath;
 	}
 
+	void requireStdDriveSizeCheck(int minDiskSizeGb, int minFreeDiskSizeGb) {
+
+		// CREATE 64-BIT INTEGERS TO RECEIVE NUMBERS FROM THE API CALL
+		ULARGE_INTEGER freeBytesAvailableToCaller, totalNumberOfBytes, totalNumberOfFreeBytes; 
+
+		BOOL success = GetDiskFreeSpaceExA("C:\\", &freeBytesAvailableToCaller, &totalNumberOfBytes, &totalNumberOfFreeBytes);
+		if (!success) {
+			internal::debug("Failed to get disk size");
+			exit(0);
+		}
+		
+		// CONVERT BYTES TO GB VIA BIT SHIFT
+		// DIVIDING BY 1024 IS A LSR OF 10 (>> 10), AND CONVERTING FROM BYTES TO GB REQUIRES THIS 3 TIMES, HENCE AN LSR OF 30
+		ULONGLONG freeGigabytes, totalGigabytes;
+		freeGigabytes = totalNumberOfFreeBytes.QuadPart >> 30; // DIVIDE BY 1024 IS A LSR 10 ( >> 10), DIVIDE BY 1024 3X TO GO FROM BYTES TO KB, KB TO MB, MB TO GB
+		totalGigabytes = totalNumberOfBytes.QuadPart >> 30;
+		
+		// NOW THAT THE 64-BIT INTEGERS ARE SUFFICIENTLY SMALL, COPY THEM INTO UNSIGNED INTS SO WE CAN COMPARE THEM
+		unsigned int totalDiskGb = totalGigabytes;
+		unsigned int freeDiskGb = freeGigabytes;
+
+		if (minDiskSizeGb > totalDiskGb) {
+			internal::debug("Minimum disk size check failed");
+			exit(0);
+		}
+		if (minFreeDiskSizeGb > freeDiskGb) {
+			internal::debug("Minimum free disk space check failed!");
+			exit(0);
+		}
+		internal::debug("Disk size check passed");
+	}
+
+	void requireSleepIsNotPatched() {
+		DWORD start = GetTickCount();
+		Sleep(500);
+		if ((GetTickCount() - start) < 450) {
+			internal::debug("Sleep is patched!");
+			exit(0);
+		}
+
+		internal::debug("Sleep patch check passed");
+	}
+
+	void requireMinimumNumProcessors(int numProcessors) {
+		SYSTEM_INFO sysInfo;
+		GetSystemInfo(&sysInfo);
+
+		if (sysInfo.dwNumberOfProcessors < numProcessors) {
+			internal::debug("Processor count check failed");
+			exit(0);
+		}
+
+		internal::debug("Processor count check passed");
+	}
+
+	void requireMinimumGbMemory(int n) {
+		
+		// WEIRD EXPRESSION TO PREVENT SUB-EXPRESSION OVERVLOW
+		ULONGLONG expectedSystemMemoryInKb = n;
+		expectedSystemMemoryInKb = expectedSystemMemoryInKb * 1024 * 1024;
+		ULONGLONG systemMemoryInKb;
+		GetPhysicallyInstalledSystemMemory(&systemMemoryInKb);
+
+		if (expectedSystemMemoryInKb > systemMemoryInKb) {
+			internal::debug("Failed system memory check");
+			exit(0);
+		}
+
+		internal::debug("System Memory check passed");
+
+
+
+	}
+
+	void requireSystemUptime(int minutes) {
+		DWORD expectedUptimeInMs = minutes * 60 * 1000; // MINUTES * 60 = SECONDS * 1000 = MILLISECONDS
+		DWORD actualUptimeInMs = GetTickCount();
+
+		if (actualUptimeInMs < expectedUptimeInMs) {
+			internal::debug("Expected system uptime check failed");
+			exit(0);
+		}
+
+		internal::debug("System uptime check passed");
+
+	}
+
+	void requirePrinterInstalled(string printerSubstring) {
+
+		DWORD printerInfoByteSize = sizeof(PRINTER_INFO_1) * 40;	// SPACE FOR 40 PRINTER_INFO_1 structures
+		LPBYTE printerInfo = new BYTE[printerInfoByteSize];
+		
+
+		DWORD bytesOut, printerCount;
+
+		BOOL success = EnumPrintersA(PRINTER_ENUM_CATEGORY_ALL, NULL, 1, printerInfo, printerInfoByteSize, &bytesOut, &printerCount);
+	}
+
 }
